@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+CONTAINER="${YARQUA_MSSQL_CONTAINER:-yarqua_mssql}"
+SA_PASSWORD="${MSSQL_SA_PASSWORD:-Yarqua_Str0ng!Passw0rd}"
+
+echo "==> Esperando SQL Server en $CONTAINER..."
+for i in $(seq 1 60); do
+  if docker exec "$CONTAINER" /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -Q "SELECT 1" &>/dev/null; then
+    break
+  fi
+  sleep 2
+done
+
+for f in 006_rename_to_dbyarqua.sql 001_create_database.sql 002_tables.sql 003_seed_geo.sql 004_seed_colombia_geo_full.sql 005_drop_bug_add_serilog_log.sql; do
+  echo "==> $f"
+  docker cp "$ROOT/database/init/$f" "$CONTAINER:/tmp/$f"
+  docker exec "$CONTAINER" /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -b -i "/tmp/$f"
+done
+
+echo "==> Verificación"
+docker exec "$CONTAINER" /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -d dbYarqua -Q \
+  "SELECT 'Pais' t, COUNT(*) c FROM YarqtbPais
+   UNION ALL SELECT 'Depo', COUNT(*) FROM YarqtbDepartamento
+   UNION ALL SELECT 'Ciu', COUNT(*) FROM YarqtbCiudad
+   UNION ALL SELECT 'Depo_CO', COUNT(*) FROM YarqtbDepartamento WHERE Pais_Id=170
+   UNION ALL SELECT 'Ciu_CO', COUNT(*) FROM YarqtbCiudad WHERE Pais_Id=170;"
+echo "OK: base dbYarqua lista."

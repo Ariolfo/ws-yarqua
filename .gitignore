@@ -1,0 +1,17 @@
+## Secretos y entorno local
+.env
+.env.local
+*.user
+
+## Build
+**/bin/
+**/obj/
+**/out/
+*.user
+*.suo
+.vs/
+.idea/
+
+## Logs / test
+TestResults/
+*.log
