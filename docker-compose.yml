@@ -2,7 +2,7 @@
 # Imagen local alineada con el motor corporativo AGROSAVIA.
 services:
   mssql:
-    image: local/dragro-mssql:2019-cu25-15.0.4355.3
+    image: local/mssql:2019-cu25-15.0.4355.3
     container_name: yarqua_mssql
     hostname: yarqua_mssql
     restart: unless-stopped

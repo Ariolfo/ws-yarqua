@@ -35,7 +35,7 @@ public class GetSensorHistoryQueryHandler : IRequestHandler<GetSensorHistoryQuer
     }
 
     /// <summary>
-    /// Obtiene puntos Cont Vol1/Vol2 convertidos a profundidad.
+    /// Obtiene puntos Cont Vol1/Vol2 (sensor_1 / sensor_2).
     /// </summary>
     public async Task<IReadOnlyList<HistoryPointDto>> Handle(
         GetSensorHistoryQuery request,

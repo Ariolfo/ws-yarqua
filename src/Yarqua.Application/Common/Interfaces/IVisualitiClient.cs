@@ -11,10 +11,10 @@ public class VisualitiReading
     /// <summary>Valores en porcentaje por canal lógico (1 = Cont Vol1, 2 = Cont Vol2).</summary>
     public Dictionary<int, double> Valores { get; set; } = new();
 
-    /// <summary>Valor del canal 1 (depth 10 cm).</summary>
+    /// <summary>Valor del canal 1 (Cont Vol1 / sensor_1).</summary>
     public double? Volumetrico1 => Valores.TryGetValue(1, out var v) ? v : null;
 
-    /// <summary>Valor del canal 2 (depth 30 cm).</summary>
+    /// <summary>Valor del canal 2 (Cont Vol2 / sensor_2).</summary>
     public double? Volumetrico2 => Valores.TryGetValue(2, out var v) ? v : null;
 
     /// <summary>

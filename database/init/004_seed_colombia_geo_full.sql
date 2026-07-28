@@ -1,7 +1,6 @@
 /*
-  Catálogo geográfico completo Colombia (33 deptos / 1122 ciudades)
-  Origen: prototipo Postgres Fontagro_SH / sensores_db (DrAgro master)
-  Conserva Ecuador y Honduras del seed MVP.
+  Catálogo geográfico completo Colombia (33 deptos / 1122 ciudades).
+  Conserva Ecuador y Honduras del seed base.
   Autor: AGROSAVIA · Yarqua | 2026-07-22
 */
 USE [dbYarqua];

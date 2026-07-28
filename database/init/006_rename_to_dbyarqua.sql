@@ -1,5 +1,5 @@
 /*
-  Migración: renombra Yarqua → dbYarqua y aplica collation Modern_Spanish_CI_AS.
+  Ajuste de nomenclatura: renombra Yarqua → dbYarqua y aplica collation Modern_Spanish_CI_AS.
   Los CHECK dependen de la collation; se recrean tras el cambio.
 */
 SET NOCOUNT ON;

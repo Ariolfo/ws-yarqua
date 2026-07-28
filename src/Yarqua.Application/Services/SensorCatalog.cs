@@ -56,7 +56,7 @@ public sealed class PhysicalSensor
 }
 
 /// <summary>
-/// Catálogo estático de sensores Yarqua (misma fuente que Fontagro sensor_catalog).
+/// Catálogo estático de sensores Yarqua.
 /// </summary>
 public static partial class SensorCatalog
 {
@@ -118,7 +118,7 @@ public static partial class SensorCatalog
     }
 
     /// <summary>
-    /// Cont Vol{n} → sensor lógico M###-n.
+    /// Cont Vol{n} → sensor lógico M###-n (sensor_n).
     /// </summary>
     /// <param name="physicalSerial">Serial físico.</param>
     /// <param name="channel">Canal.</param>

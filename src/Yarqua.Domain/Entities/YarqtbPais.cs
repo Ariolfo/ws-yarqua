@@ -1,7 +1,7 @@
 namespace Yarqua.Domain.Entities;
 
 /// <summary>
-/// Catálogo de países (espejo DrAgro / DagrtbPais).
+/// Catálogo de países.
 /// </summary>
 public class YarqtbPais
 {

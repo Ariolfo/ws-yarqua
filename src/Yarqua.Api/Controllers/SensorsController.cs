@@ -63,7 +63,7 @@ public class SensorsController : ControllerBase
     }
 
     /// <summary>
-    /// Histórico de humedad Cont Vol1/Vol2.
+    /// Histórico de humedad Cont Vol1/Vol2 (sensor_1 / sensor_2).
     /// </summary>
     /// <param name="sensorId">Identificador del sensor.</param>
     /// <param name="range">Rango today|7d|30d|6m.</param>

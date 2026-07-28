@@ -1,5 +1,5 @@
 /*
-  Semilla geográfica MVP — Colombia, Ecuador, Honduras.
+  Semilla geográfica base — Colombia, Ecuador, Honduras.
   Incluye Valle del Cauca (zona RED ASORUT) y capitales/principales para registro.
   Autor: AGROSAVIA · Yarqua | 2026-07-22
 */

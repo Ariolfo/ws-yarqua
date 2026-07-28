@@ -84,10 +84,10 @@ public class GeoCityDto
     public int DepoId { get; set; }
 }
 
-/// <summary>Lectura de humedad por profundidad.</summary>
+/// <summary>Lectura de humedad por canal (sensor_1 / sensor_2).</summary>
 public class ReadingDto
 {
-    /// <summary>Profundidad en cm (10 o 30).</summary>
+    /// <summary>Canal lógico como código de profundidad (10 = sensor_1, 30 = sensor_2).</summary>
     public int DepthCm { get; set; }
 
     /// <summary>Valor en porcentaje.</summary>
@@ -121,7 +121,7 @@ public class SensorDto
     /// <summary>Última lectura.</summary>
     public DateTimeOffset LastReadingAt { get; set; }
 
-    /// <summary>Lecturas por profundidad.</summary>
+    /// <summary>Lecturas por canal (sensor_1 / sensor_2).</summary>
     public List<ReadingDto> Readings { get; set; } = new();
 
     /// <summary>Mensaje de alerta opcional.</summary>
@@ -165,10 +165,10 @@ public class HistoryPointDto
     /// <summary>Marca de tiempo.</summary>
     public DateTimeOffset Timestamp { get; set; }
 
-    /// <summary>Humedad a 10 cm (Cont Vol1).</summary>
+    /// <summary>Humedad Cont Vol1 (sensor_1).</summary>
     public double Depth10cm { get; set; }
 
-    /// <summary>Humedad a 30 cm (Cont Vol2).</summary>
+    /// <summary>Humedad Cont Vol2 (sensor_2).</summary>
     public double Depth30cm { get; set; }
 }
 

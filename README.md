@@ -1,6 +1,6 @@
 # Yarqua Backend (ws-yarqua)
 
-API .NET 9 Clean Architecture + CQRS para el MVP Ionic de Yarqua.  
+API .NET 9 Clean Architecture + CQRS para la app Ionic de Yarqua.  
 Incluye **SQL Server** (scripts + Docker) en este mismo repositorio.
 
 ## Contenido del repo
@@ -35,7 +35,7 @@ docker compose up -d
 - Puerto host: `1433`
 - SA (dev, vía Docker): ver `docker-compose.yml` / `.env`
 - Base: **`dbYarqua`** · collation **`Modern_Spanish_CI_AS`**
-- Imagen: `local/dragro-mssql:2019-cu25-15.0.4355.3`
+- Imagen: `local/mssql:2019-cu25-15.0.4355.3`
 
 > Si otro contenedor ya usa el 1433, deténgalo o cambie el mapeo.
 
@@ -94,8 +94,33 @@ cd ws-yarqua
 dotnet restore
 dotnet build
 dotnet run --project src/Yarqua.Api --launch-profile http
-# http://localhost:5080  · Swagger (Development): /swagger  · Health: /health
 ```
+
+| Servicio | URL / puerto |
+|----------|----------------|
+| API HTTP | `http://localhost:5080` (escucha `0.0.0.0:5080`) |
+| Swagger | `http://localhost:5080/swagger` (Development) |
+| Health | `http://localhost:5080/health` |
+| SQL Server | `localhost:1433` · base `dbYarqua` |
+
+## App móvil (app-yarqua) — el otro lado
+
+La UI Ionic corre en el puerto **8100** y apunta a esta API vía `apiBaseUrl`.
+
+| Servicio | URL / puerto |
+|----------|----------------|
+| App web (Ionic) | `http://localhost:8100` |
+| API que usa la app | `http://127.0.0.1:5080/api/v1` |
+
+```bash
+cd ../app-yarqua   # o la ruta del repo app-yarqua
+npm install
+npx ionic serve
+# → http://localhost:8100
+```
+
+Configuración de la URL en `app-yarqua/src/environments/environment.ts`.  
+Detalle (Capacitor, pantallas): ver `app-yarqua/README.md`.
 
 ## Pruebas
 
@@ -108,5 +133,5 @@ dotnet test
 
 - Sensores: catálogo estático; lecturas en vivo vía Visualiti.
 - Estaciones: `fin-{slug}` (finca) o `sn-M###` (sensor sin finca).
-- Humedad: `Cont Vol1` → depth10cm, `Cont Vol2` → depth30cm; valor ≤ 1.5 → ×100.
+- Humedad: `Cont Vol1` → sensor_1, `Cont Vol2` → sensor_2; valor ≤ 1.5 → ×100.
 - Irrigation **no** forma parte de este backend (lógica en la app).
