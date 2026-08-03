@@ -12,7 +12,7 @@ for i in $(seq 1 60); do
   sleep 2
 done
 
-for f in 006_rename_to_dbyarqua.sql 001_create_database.sql 002_tables.sql 003_seed_geo.sql 004_seed_colombia_geo_full.sql 005_drop_bug_add_serilog_log.sql; do
+for f in 001_create_database.sql 006_rename_to_dbyarqua.sql 002_tables.sql 003_seed_geo.sql 004_seed_colombia_geo_full.sql 005_drop_bug_add_serilog_log.sql; do
   echo "==> $f"
   docker cp "$ROOT/database/init/$f" "$CONTAINER:/tmp/$f"
   docker exec "$CONTAINER" /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -b -i "/tmp/$f"

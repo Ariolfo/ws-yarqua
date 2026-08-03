@@ -15,10 +15,10 @@ public class YarqtbUsuarioDispositivo
     public string UdiPlatform { get; set; } = "android";
 
     /// <summary>Fecha de registro.</summary>
-    public DateTimeOffset UdiFechaRegistro { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime UdiFechaRegistro { get; set; } = DateTime.UtcNow;
 
     /// <summary>Fecha de actualización.</summary>
-    public DateTimeOffset UdiFechaActualizacion { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime UdiFechaActualizacion { get; set; } = DateTime.UtcNow;
 
     /// <summary>Indica si el vínculo está activo.</summary>
     public bool UdiActivo { get; set; } = true;

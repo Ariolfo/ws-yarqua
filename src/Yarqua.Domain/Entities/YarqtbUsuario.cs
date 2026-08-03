@@ -18,13 +18,13 @@ public class YarqtbUsuario
     public string UsuaCodigoCiudad { get; set; } = string.Empty;
 
     /// <summary>Fecha de registro.</summary>
-    public DateTimeOffset UsuaFechaRegistro { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime UsuaFechaRegistro { get; set; } = DateTime.UtcNow;
 
     /// <summary>Fecha de creación del registro.</summary>
-    public DateTimeOffset UsuaFechaCreacion { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime UsuaFechaCreacion { get; set; } = DateTime.UtcNow;
 
     /// <summary>Fecha de última actualización.</summary>
-    public DateTimeOffset UsuaFechaActualizacion { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime UsuaFechaActualizacion { get; set; } = DateTime.UtcNow;
 
     /// <summary>Indica si el usuario está activo.</summary>
     public bool UsuaActivo { get; set; } = true;

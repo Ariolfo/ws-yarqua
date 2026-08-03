@@ -24,8 +24,8 @@ public class YarqtbEventoUsuario
     public string? EvenSensorId { get; set; }
 
     /// <summary>Fecha de creación.</summary>
-    public DateTimeOffset EvenFechaCreacion { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime EvenFechaCreacion { get; set; } = DateTime.UtcNow;
 
     /// <summary>Fecha de actualización.</summary>
-    public DateTimeOffset EvenFechaActualizacion { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime EvenFechaActualizacion { get; set; } = DateTime.UtcNow;
 }
