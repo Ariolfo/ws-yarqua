@@ -124,15 +124,15 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
                 UsuaCodigoDepartamento = location.CodigoDepartamento,
                 UsuaCodigoCiudad = location.CodigoCiudad,
                 UsuaActivo = true,
-                UsuaFechaRegistro = DateTimeOffset.UtcNow,
-                UsuaFechaCreacion = DateTimeOffset.UtcNow,
-                UsuaFechaActualizacion = DateTimeOffset.UtcNow,
+                UsuaFechaRegistro = DateTime.UtcNow,
+                UsuaFechaCreacion = DateTime.UtcNow,
+                UsuaFechaActualizacion = DateTime.UtcNow,
             });
         }
         else
         {
             existing.UsuaActivo = true;
-            existing.UsuaFechaActualizacion = DateTimeOffset.UtcNow;
+            existing.UsuaFechaActualizacion = DateTime.UtcNow;
         }
 
         _eventos.Add(new YarqtbEventoUsuario
@@ -141,8 +141,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
             EvenEvento = "REGISTRO",
             EvenFecha = DateOnly.FromDateTime(DateTime.UtcNow),
             EvenHora = TimeOnly.FromDateTime(DateTime.UtcNow),
-            EvenFechaCreacion = DateTimeOffset.UtcNow,
-            EvenFechaActualizacion = DateTimeOffset.UtcNow,
+            EvenFechaCreacion = DateTime.UtcNow,
+            EvenFechaActualizacion = DateTime.UtcNow,
         });
 
         var userId = UserIdBuilder.Build(
@@ -169,8 +169,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
                     UsuaId = userId,
                     UdiPlatform = platform,
                     UdiActivo = true,
-                    UdiFechaRegistro = DateTimeOffset.UtcNow,
-                    UdiFechaActualizacion = DateTimeOffset.UtcNow,
+                    UdiFechaRegistro = DateTime.UtcNow,
+                    UdiFechaActualizacion = DateTime.UtcNow,
                 });
             }
             else
@@ -178,7 +178,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
                 device.UsuaId = userId;
                 device.UdiPlatform = platform;
                 device.UdiActivo = true;
-                device.UdiFechaActualizacion = DateTimeOffset.UtcNow;
+                device.UdiFechaActualizacion = DateTime.UtcNow;
             }
         }
 

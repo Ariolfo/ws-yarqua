@@ -21,8 +21,8 @@ public class YarqtbDevicePushToken
     public bool DptActivo { get; set; } = true;
 
     /// <summary>Fecha de registro.</summary>
-    public DateTimeOffset DptFechaRegistro { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime DptFechaRegistro { get; set; } = DateTime.UtcNow;
 
     /// <summary>Fecha de actualización.</summary>
-    public DateTimeOffset DptFechaActualizacion { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime DptFechaActualizacion { get; set; } = DateTime.UtcNow;
 }
