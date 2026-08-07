@@ -1,21 +1,18 @@
 namespace Yarqua.Domain.Entities;
 
 /// <summary>
-/// Usuario de la aplicación. Clave primaria compuesta sin id sustituto.
+/// Usuario de la aplicación. Referencia geográfica solo a Ciudad.
 /// </summary>
 public class YarqtbUsuario
 {
-    /// <summary>Nombre del usuario (parte de la PK).</summary>
+    /// <summary>Identificador sustituto.</summary>
+    public long UsuaId { get; set; }
+
+    /// <summary>Nombre del usuario.</summary>
     public string UsuaNombre { get; set; } = string.Empty;
 
-    /// <summary>Código de país (parte de la PK).</summary>
-    public string UsuaCodigoPais { get; set; } = string.Empty;
-
-    /// <summary>Código de departamento (parte de la PK).</summary>
-    public string UsuaCodigoDepartamento { get; set; } = string.Empty;
-
-    /// <summary>Código de ciudad (parte de la PK).</summary>
-    public string UsuaCodigoCiudad { get; set; } = string.Empty;
+    /// <summary>Ciudad de residencia (única FK geográfica).</summary>
+    public int CiuId { get; set; }
 
     /// <summary>Fecha de registro.</summary>
     public DateTime UsuaFechaRegistro { get; set; } = DateTime.UtcNow;
@@ -28,4 +25,7 @@ public class YarqtbUsuario
 
     /// <summary>Indica si el usuario está activo.</summary>
     public bool UsuaActivo { get; set; } = true;
+
+    /// <summary>Ciudad navegación.</summary>
+    public YarqtbCiudad? Ciudad { get; set; }
 }

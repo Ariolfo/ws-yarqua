@@ -8,46 +8,33 @@ namespace Yarqua.Application.Common.Interfaces;
 /// </summary>
 public interface IGeoRepository
 {
-    /// <summary>
-    /// Lista países para la API (DTO).
-    /// </summary>
+    /// <summary>Lista países para la API (DTO).</summary>
     Task<IReadOnlyList<GeoCountryDto>> GetCountriesAsync(
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Lista departamentos de un país (DTO).
-    /// </summary>
+    /// <summary>Lista departamentos de un país (DTO).</summary>
     Task<IReadOnlyList<GeoDepartmentDto>> GetDepartmentsByPaisIdAsync(
         int paisId,
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Lista ciudades de un departamento con filtro opcional (DTO).
-    /// </summary>
+    /// <summary>Lista ciudades de un departamento con filtro opcional (DTO).</summary>
     Task<IReadOnlyList<GeoCityDto>> GetCitiesByDepoIdAsync(
         int depoId,
         string? query,
         int limit,
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Todos los países (entidades) para resolución de nombres.
-    /// </summary>
+    /// <summary>Todos los países (entidades).</summary>
     Task<IReadOnlyList<YarqtbPais>> ListPaisesAsync(
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Departamentos de un país (entidades).
-    /// </summary>
+    /// <summary>Departamentos de un país (entidades).</summary>
     Task<IReadOnlyList<YarqtbDepartamento>> ListDepartamentosByPaisIdAsync(
         int paisId,
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Ciudades de país + código de departamento (entidades).
-    /// </summary>
-    Task<IReadOnlyList<YarqtbCiudad>> ListCiudadesByPaisAndDepoAsync(
-        int paisId,
-        string depoCode,
+    /// <summary>Ciudades de un departamento (entidades).</summary>
+    Task<IReadOnlyList<YarqtbCiudad>> ListCiudadesByDepoIdAsync(
+        int depoId,
         CancellationToken cancellationToken = default);
 }

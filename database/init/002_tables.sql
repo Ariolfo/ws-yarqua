@@ -1,7 +1,8 @@
 /*
   Esquema Yarqtb* — nomenclatura PAUTAS_BD / Guía de Arquitectura AGROSAVIA.
-  Los sensores y lecturas NO se persisten: se consultan en vivo vía API Visualiti.
-  Autor: AGROSAVIA · Yarqua | 2026-07-22
+  Geo: País → Departamento → Ciudad (sin FK redundantes).
+  Usuario referencia solo Ciudad.
+  Autor: AGROSAVIA · Yarqua | 2026-08-07
 */
 USE [dbYarqua];
 GO
@@ -37,13 +38,10 @@ BEGIN
         Ciu_Id     INT           NOT NULL,
         Ciu_Nombre NVARCHAR(255) NOT NULL,
         Depo_Id    INT           NOT NULL,
-        Pais_Id    INT           NOT NULL,
         Ciu_Cod    NVARCHAR(50)  NOT NULL,
-        Depo_Cod   NVARCHAR(50)  NOT NULL,
         CONSTRAINT PK_YarqtbCiudad PRIMARY KEY (Ciu_Id),
         CONSTRAINT FK_YarqtbCiudad_Depo FOREIGN KEY (Depo_Id) REFERENCES dbo.YarqtbDepartamento (Depo_Id),
-        CONSTRAINT FK_YarqtbCiudad_Pais FOREIGN KEY (Pais_Id) REFERENCES dbo.YarqtbPais (Pais_Id),
-        CONSTRAINT UQ_YarqtbCiudad_Cod UNIQUE (Ciu_Cod, Depo_Cod, Pais_Id)
+        CONSTRAINT UQ_YarqtbCiudad_Depo_Cod UNIQUE (Depo_Id, Ciu_Cod)
     );
 END
 GO
@@ -51,17 +49,16 @@ GO
 IF OBJECT_ID(N'dbo.YarqtbUsuario', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.YarqtbUsuario (
-        Usua_Nombre              NVARCHAR(150) NOT NULL,
-        Usua_CodigoPais          NVARCHAR(3)   NOT NULL,
-        Usua_CodigoDepartamento  NVARCHAR(10)  NOT NULL,
-        Usua_CodigoCiudad        NVARCHAR(15)  NOT NULL,
-        Usua_FechaRegistro       DATETIME2(7)  NOT NULL CONSTRAINT DF_YarqtbUsuario_FechaRegistro DEFAULT (SYSUTCDATETIME()),
-        Usua_FechaCreacion       DATETIME2(7)  NOT NULL CONSTRAINT DF_YarqtbUsuario_FechaCreacion DEFAULT (SYSUTCDATETIME()),
-        Usua_FechaActualizacion  DATETIME2(7)  NOT NULL CONSTRAINT DF_YarqtbUsuario_FechaActualizacion DEFAULT (SYSUTCDATETIME()),
-        Usua_Activo              BIT           NOT NULL CONSTRAINT DF_YarqtbUsuario_Activo DEFAULT (1),
-        CONSTRAINT PK_YarqtbUsuario PRIMARY KEY (
-            Usua_Nombre, Usua_CodigoPais, Usua_CodigoDepartamento, Usua_CodigoCiudad
-        )
+        Usua_Id                 BIGINT IDENTITY(1,1) NOT NULL,
+        Usua_Nombre             NVARCHAR(150) NOT NULL,
+        Ciu_Id                  INT           NOT NULL,
+        Usua_FechaRegistro      DATETIME2(7)  NOT NULL CONSTRAINT DF_YarqtbUsuario_FechaRegistro DEFAULT (SYSUTCDATETIME()),
+        Usua_FechaCreacion      DATETIME2(7)  NOT NULL CONSTRAINT DF_YarqtbUsuario_FechaCreacion DEFAULT (SYSUTCDATETIME()),
+        Usua_FechaActualizacion DATETIME2(7)  NOT NULL CONSTRAINT DF_YarqtbUsuario_FechaActualizacion DEFAULT (SYSUTCDATETIME()),
+        Usua_Activo             BIT           NOT NULL CONSTRAINT DF_YarqtbUsuario_Activo DEFAULT (1),
+        CONSTRAINT PK_YarqtbUsuario PRIMARY KEY (Usua_Id),
+        CONSTRAINT UQ_YarqtbUsuario_Nombre_Ciudad UNIQUE (Usua_Nombre, Ciu_Id),
+        CONSTRAINT FK_YarqtbUsuario_Ciudad FOREIGN KEY (Ciu_Id) REFERENCES dbo.YarqtbCiudad (Ciu_Id)
     );
 END
 GO

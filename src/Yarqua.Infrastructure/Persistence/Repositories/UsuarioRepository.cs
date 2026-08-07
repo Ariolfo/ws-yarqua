@@ -12,9 +12,7 @@ public sealed class UsuarioRepository : IUsuarioRepository
 {
     private readonly YarquaDbContext _db;
 
-    /// <summary>
-    /// Inicializa el repositorio.
-    /// </summary>
+    /// <summary>Inicializa el repositorio.</summary>
     public UsuarioRepository(YarquaDbContext db)
     {
         _db = db;
@@ -23,16 +21,11 @@ public sealed class UsuarioRepository : IUsuarioRepository
     /// <inheritdoc />
     public Task<YarqtbUsuario?> FindAsync(
         string nombre,
-        string codigoPais,
-        string codigoDepartamento,
-        string codigoCiudad,
+        int ciuId,
         CancellationToken cancellationToken = default)
     {
         return _db.Usuarios.FirstOrDefaultAsync(
-            u => u.UsuaNombre == nombre
-                 && u.UsuaCodigoPais == codigoPais
-                 && u.UsuaCodigoDepartamento == codigoDepartamento
-                 && u.UsuaCodigoCiudad == codigoCiudad,
+            u => u.UsuaNombre == nombre && u.CiuId == ciuId,
             cancellationToken);
     }
 

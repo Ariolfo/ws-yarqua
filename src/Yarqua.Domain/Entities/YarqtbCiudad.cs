@@ -1,7 +1,8 @@
 namespace Yarqua.Domain.Entities;
 
 /// <summary>
-/// Catálogo de ciudades / municipios.
+/// Catálogo de ciudades / municipios / cantones.
+/// Solo referencia a departamento (el país se obtiene vía Departamento → País).
 /// </summary>
 public class YarqtbCiudad
 {
@@ -14,18 +15,9 @@ public class YarqtbCiudad
     /// <summary>Identificador del departamento.</summary>
     public int DepoId { get; set; }
 
-    /// <summary>Identificador del país.</summary>
-    public int PaisId { get; set; }
-
-    /// <summary>Código de la ciudad.</summary>
+    /// <summary>Código de la ciudad (DANE / GeoNames admin2).</summary>
     public string CiuCod { get; set; } = string.Empty;
-
-    /// <summary>Código del departamento (desnormalizado).</summary>
-    public string DepoCod { get; set; } = string.Empty;
 
     /// <summary>Departamento navegación.</summary>
     public YarqtbDepartamento? Departamento { get; set; }
-
-    /// <summary>País navegación.</summary>
-    public YarqtbPais? Pais { get; set; }
 }

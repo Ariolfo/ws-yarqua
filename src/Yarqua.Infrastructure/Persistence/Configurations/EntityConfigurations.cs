@@ -46,12 +46,9 @@ public class YarqtbCiudadConfiguration : IEntityTypeConfiguration<YarqtbCiudad>
         builder.Property(x => x.CiuId).HasColumnName("Ciu_Id");
         builder.Property(x => x.CiuNombre).HasColumnName("Ciu_Nombre").HasMaxLength(255).IsRequired();
         builder.Property(x => x.DepoId).HasColumnName("Depo_Id");
-        builder.Property(x => x.PaisId).HasColumnName("Pais_Id");
         builder.Property(x => x.CiuCod).HasColumnName("Ciu_Cod").HasMaxLength(50).IsRequired();
-        builder.Property(x => x.DepoCod).HasColumnName("Depo_Cod").HasMaxLength(50).IsRequired();
-        builder.HasIndex(x => new { x.CiuCod, x.DepoCod, x.PaisId }).IsUnique();
+        builder.HasIndex(x => new { x.DepoId, x.CiuCod }).IsUnique();
         builder.HasOne(x => x.Departamento).WithMany(d => d.Ciudades).HasForeignKey(x => x.DepoId);
-        builder.HasOne(x => x.Pais).WithMany(p => p.Ciudades).HasForeignKey(x => x.PaisId);
     }
 }
 
@@ -62,15 +59,16 @@ public class YarqtbUsuarioConfiguration : IEntityTypeConfiguration<YarqtbUsuario
     public void Configure(EntityTypeBuilder<YarqtbUsuario> builder)
     {
         builder.ToTable("YarqtbUsuario");
-        builder.HasKey(x => new { x.UsuaNombre, x.UsuaCodigoPais, x.UsuaCodigoDepartamento, x.UsuaCodigoCiudad });
+        builder.HasKey(x => x.UsuaId);
+        builder.Property(x => x.UsuaId).HasColumnName("Usua_Id").ValueGeneratedOnAdd();
         builder.Property(x => x.UsuaNombre).HasColumnName("Usua_Nombre").HasMaxLength(150).IsRequired();
-        builder.Property(x => x.UsuaCodigoPais).HasColumnName("Usua_CodigoPais").HasMaxLength(3).IsRequired();
-        builder.Property(x => x.UsuaCodigoDepartamento).HasColumnName("Usua_CodigoDepartamento").HasMaxLength(10).IsRequired();
-        builder.Property(x => x.UsuaCodigoCiudad).HasColumnName("Usua_CodigoCiudad").HasMaxLength(15).IsRequired();
+        builder.Property(x => x.CiuId).HasColumnName("Ciu_Id");
         builder.Property(x => x.UsuaFechaRegistro).HasColumnName("Usua_FechaRegistro");
         builder.Property(x => x.UsuaFechaCreacion).HasColumnName("Usua_FechaCreacion");
         builder.Property(x => x.UsuaFechaActualizacion).HasColumnName("Usua_FechaActualizacion");
         builder.Property(x => x.UsuaActivo).HasColumnName("Usua_Activo");
+        builder.HasIndex(x => new { x.UsuaNombre, x.CiuId }).IsUnique();
+        builder.HasOne(x => x.Ciudad).WithMany().HasForeignKey(x => x.CiuId);
     }
 }
 

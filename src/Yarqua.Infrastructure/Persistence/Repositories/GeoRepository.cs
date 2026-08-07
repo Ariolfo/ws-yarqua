@@ -13,9 +13,7 @@ public sealed class GeoRepository : IGeoRepository
 {
     private readonly YarquaDbContext _db;
 
-    /// <summary>
-    /// Inicializa el repositorio.
-    /// </summary>
+    /// <summary>Inicializa el repositorio.</summary>
     public GeoRepository(YarquaDbContext db)
     {
         _db = db;
@@ -100,14 +98,13 @@ public sealed class GeoRepository : IGeoRepository
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<YarqtbCiudad>> ListCiudadesByPaisAndDepoAsync(
-        int paisId,
-        string depoCode,
+    public async Task<IReadOnlyList<YarqtbCiudad>> ListCiudadesByDepoIdAsync(
+        int depoId,
         CancellationToken cancellationToken = default)
     {
         return await _db.Ciudades
             .AsNoTracking()
-            .Where(c => c.PaisId == paisId && c.DepoCod == depoCode)
+            .Where(c => c.DepoId == depoId)
             .ToListAsync(cancellationToken);
     }
 }

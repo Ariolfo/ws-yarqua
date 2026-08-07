@@ -8,13 +8,11 @@ namespace Yarqua.Application.Common.Interfaces;
 public interface IUsuarioRepository
 {
     /// <summary>
-    /// Busca un usuario por clave natural (nombre + códigos geo).
+    /// Busca un usuario por nombre + ciudad.
     /// </summary>
     Task<YarqtbUsuario?> FindAsync(
         string nombre,
-        string codigoPais,
-        string codigoDepartamento,
-        string codigoCiudad,
+        int ciuId,
         CancellationToken cancellationToken = default);
 
     /// <summary>

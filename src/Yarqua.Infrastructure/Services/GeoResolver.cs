@@ -1,6 +1,5 @@
 using Yarqua.Application.Common.Exceptions;
 using Yarqua.Application.Common.Interfaces;
-using Yarqua.Application.Services;
 
 namespace Yarqua.Infrastructure.Services;
 
@@ -12,9 +11,7 @@ public class GeoResolver : IGeoResolver
     private const int ColombiaPaisId = 170;
     private readonly IGeoRepository _geo;
 
-    /// <summary>
-    /// Inicializa el resolvedor.
-    /// </summary>
+    /// <summary>Inicializa el resolvedor.</summary>
     public GeoResolver(IGeoRepository geo)
     {
         _geo = geo;
@@ -49,13 +46,12 @@ public class GeoResolver : IGeoResolver
             .FirstOrDefault()
             ?? throw new AppException($"País no reconocido: {country}");
 
-        var codPais = pais.PaisId.ToString();
-
         var dept = await _geo.ListDepartamentosByPaisIdAsync(pais.PaisId, cancellationToken);
 
         var matchedDept = dept
             .Select(d => new
             {
+                d.DepoId,
                 d.DepoCode,
                 d.DepoNombre,
                 Score =
@@ -70,14 +66,12 @@ public class GeoResolver : IGeoResolver
             .FirstOrDefault()
             ?? throw new AppException($"Departamento no reconocido: {department}");
 
-        var ciudades = await _geo.ListCiudadesByPaisAndDepoAsync(
-            pais.PaisId,
-            matchedDept.DepoCode,
-            cancellationToken);
+        var ciudades = await _geo.ListCiudadesByDepoIdAsync(matchedDept.DepoId, cancellationToken);
 
         var matchedCity = ciudades
             .Select(c => new
             {
+                c.CiuId,
                 c.CiuCod,
                 c.CiuNombre,
                 Score =
@@ -89,44 +83,18 @@ public class GeoResolver : IGeoResolver
             .Where(x => x.Score < 99)
             .OrderBy(x => x.Score)
             .ThenBy(x => x.CiuNombre)
-            .FirstOrDefault();
-
-        string codCiudad;
-        string ciudadNombre;
-
-        if (matchedCity is not null)
-        {
-            codCiudad = string.IsNullOrWhiteSpace(matchedCity.CiuCod)
-                ? SyntheticCityCode(cityQ)
-                : matchedCity.CiuCod;
-            ciudadNombre = matchedCity.CiuNombre;
-        }
-        else
-        {
-            var fallback = ciudades
-                .Where(c => !string.IsNullOrWhiteSpace(c.CiuCod))
-                .OrderBy(c => string.Equals(c.CiuNombre, cityQ, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
-                .ThenBy(c => c.CiuNombre)
-                .FirstOrDefault()
-                ?? throw new AppException($"Ciudad no reconocida: {city}");
-
-            codCiudad = fallback.CiuCod;
-            ciudadNombre = cityQ;
-        }
-
-        if (codCiudad.Length > 15)
-        {
-            codCiudad = codCiudad[..15];
-        }
+            .FirstOrDefault()
+            ?? throw new AppException($"Ciudad no reconocida: {city}");
 
         return new ResolvedLocation
         {
-            CodigoPais = codPais,
+            CiuId = matchedCity.CiuId,
+            CodigoPais = pais.PaisId.ToString(),
             CodigoDepartamento = matchedDept.DepoCode,
-            CodigoCiudad = codCiudad,
+            CodigoCiudad = matchedCity.CiuCod,
             PaisNombre = pais.PaisNombre,
             DepartamentoNombre = matchedDept.DepoNombre,
-            CiudadNombre = ciudadNombre,
+            CiudadNombre = matchedCity.CiuNombre,
         };
     }
 
@@ -145,16 +113,5 @@ public class GeoResolver : IGeoResolver
         }
 
         return name;
-    }
-
-    private static string SyntheticCityCode(string cityName)
-    {
-        var code = SlugHelper.Slugify(cityName, string.Empty).ToUpperInvariant();
-        if (code.Length > 15)
-        {
-            code = code[..15];
-        }
-
-        return string.IsNullOrEmpty(code) ? "SINCIUDAD" : code;
     }
 }

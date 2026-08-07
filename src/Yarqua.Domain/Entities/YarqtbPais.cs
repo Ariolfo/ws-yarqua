@@ -16,7 +16,4 @@ public class YarqtbPais
 
     /// <summary>Departamentos asociados al país.</summary>
     public ICollection<YarqtbDepartamento> Departamentos { get; set; } = new List<YarqtbDepartamento>();
-
-    /// <summary>Ciudades asociadas al país.</summary>
-    public ICollection<YarqtbCiudad> Ciudades { get; set; } = new List<YarqtbCiudad>();
 }

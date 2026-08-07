@@ -108,21 +108,14 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
         }
 
         var nombre = request.Name.Trim();
-        var existing = await _usuarios.FindAsync(
-            nombre,
-            location.CodigoPais,
-            location.CodigoDepartamento,
-            location.CodigoCiudad,
-            cancellationToken);
+        var existing = await _usuarios.FindAsync(nombre, location.CiuId, cancellationToken);
 
         if (existing is null)
         {
             _usuarios.Add(new YarqtbUsuario
             {
                 UsuaNombre = nombre,
-                UsuaCodigoPais = location.CodigoPais,
-                UsuaCodigoDepartamento = location.CodigoDepartamento,
-                UsuaCodigoCiudad = location.CodigoCiudad,
+                CiuId = location.CiuId,
                 UsuaActivo = true,
                 UsuaFechaRegistro = DateTime.UtcNow,
                 UsuaFechaCreacion = DateTime.UtcNow,
@@ -145,11 +138,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
             EvenFechaActualizacion = DateTime.UtcNow,
         });
 
-        var userId = UserIdBuilder.Build(
-            nombre,
-            location.CodigoPais,
-            location.CodigoDepartamento,
-            location.CodigoCiudad);
+        var userId = UserIdBuilder.Build(nombre, location.CiuId);
 
         if (!string.IsNullOrWhiteSpace(request.DeviceId))
         {

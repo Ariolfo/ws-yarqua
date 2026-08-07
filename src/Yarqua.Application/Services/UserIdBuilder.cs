@@ -11,16 +11,11 @@ namespace Yarqua.Application.Services;
 public static class UserIdBuilder
 {
     /// <summary>
-    /// Construye el id lógico: u- + primeros 16 hex de SHA256(name|pais|dept|ciudad).
+    /// Construye el id lógico: u- + primeros 16 hex de SHA256(name|ciuId).
     /// </summary>
-    /// <param name="nombre">Nombre del usuario.</param>
-    /// <param name="codPais">Código de país.</param>
-    /// <param name="codDept">Código de departamento.</param>
-    /// <param name="codCiudad">Código de ciudad.</param>
-    /// <returns>Identificador u-...</returns>
-    public static string Build(string nombre, string codPais, string codDept, string codCiudad)
+    public static string Build(string nombre, int ciuId)
     {
-        var raw = $"{nombre.Trim()}|{codPais}|{codDept}|{codCiudad}";
+        var raw = $"{nombre.Trim()}|{ciuId}";
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
         var hex = Convert.ToHexString(hash).ToLowerInvariant();
         return "u-" + hex[..16];
