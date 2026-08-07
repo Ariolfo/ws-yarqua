@@ -21,13 +21,15 @@ public class GetSensorDetailQuery : IRequest<SensorDto>
 public class GetSensorDetailQueryHandler : IRequestHandler<GetSensorDetailQuery, SensorDto>
 {
     private readonly IVisualitiClient _visualiti;
+    private readonly ISensorCatalogService _catalog;
 
     /// <summary>
     /// Inicializa el handler.
     /// </summary>
-    public GetSensorDetailQueryHandler(IVisualitiClient visualiti)
+    public GetSensorDetailQueryHandler(IVisualitiClient visualiti, ISensorCatalogService catalog)
     {
         _visualiti = visualiti;
+        _catalog = catalog;
     }
 
     /// <summary>
@@ -35,7 +37,7 @@ public class GetSensorDetailQueryHandler : IRequestHandler<GetSensorDetailQuery,
     /// </summary>
     public async Task<SensorDto> Handle(GetSensorDetailQuery request, CancellationToken cancellationToken)
     {
-        var sensor = SensorCatalog.GetSensor(request.SensorId)
+        var sensor = await _catalog.GetSensorAsync(request.SensorId, cancellationToken)
                      ?? throw new NotFoundException($"Sensor no encontrado: {request.SensorId}");
 
         var (_, channel) = SensorCatalog.SplitLogicalId(request.SensorId);

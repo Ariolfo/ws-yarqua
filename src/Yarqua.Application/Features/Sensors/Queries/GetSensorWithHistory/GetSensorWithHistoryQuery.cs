@@ -25,14 +25,15 @@ public class GetSensorWithHistoryQueryHandler
     : IRequestHandler<GetSensorWithHistoryQuery, SensorWithHistoryDto>
 {
     private readonly IVisualitiClient _visualiti;
+    private readonly ISensorCatalogService _catalog;
 
     /// <summary>
     /// Inicializa el handler.
     /// </summary>
-    /// <param name="visualiti">Cliente Visualiti.</param>
-    public GetSensorWithHistoryQueryHandler(IVisualitiClient visualiti)
+    public GetSensorWithHistoryQueryHandler(IVisualitiClient visualiti, ISensorCatalogService catalog)
     {
         _visualiti = visualiti;
+        _catalog = catalog;
     }
 
     /// <summary>
@@ -47,7 +48,7 @@ public class GetSensorWithHistoryQueryHandler
             throw new AppException($"Rango inválido: {request.Range}");
         }
 
-        var sensor = SensorCatalog.GetSensor(request.SensorId)
+        var sensor = await _catalog.GetSensorAsync(request.SensorId, cancellationToken)
                      ?? throw new NotFoundException($"Sensor no encontrado: {request.SensorId}");
 
         var (_, channel) = SensorCatalog.SplitLogicalId(request.SensorId);

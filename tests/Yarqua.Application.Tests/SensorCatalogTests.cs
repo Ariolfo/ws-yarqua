@@ -49,7 +49,8 @@ public class SensorCatalogTests
     [Fact]
     public void ToLogicalSensorDtos_ExpandsChannels()
     {
-        var sensor = SensorCatalog.GetSensor("M316")!;
+        var sensor = new PhysicalSensor(
+            "M316", "RED ASORUT", "Aguacate", "Finca San Antonio", "COLOMBIA", 4.52198, -76.07732);
         var dtos = SensorMapper.ToLogicalSensorDtos(sensor, "fin-finca-san-antonio", null);
 
         dtos.Should().HaveCount(2);

@@ -24,14 +24,15 @@ public class GetSensorHistoryQuery : IRequest<IReadOnlyList<HistoryPointDto>>
 public class GetSensorHistoryQueryHandler : IRequestHandler<GetSensorHistoryQuery, IReadOnlyList<HistoryPointDto>>
 {
     private readonly IVisualitiClient _visualiti;
+    private readonly ISensorCatalogService _catalog;
 
     /// <summary>
     /// Inicializa el handler.
     /// </summary>
-    /// <param name="visualiti">Cliente Visualiti.</param>
-    public GetSensorHistoryQueryHandler(IVisualitiClient visualiti)
+    public GetSensorHistoryQueryHandler(IVisualitiClient visualiti, ISensorCatalogService catalog)
     {
         _visualiti = visualiti;
+        _catalog = catalog;
     }
 
     /// <summary>
@@ -46,7 +47,7 @@ public class GetSensorHistoryQueryHandler : IRequestHandler<GetSensorHistoryQuer
             throw new AppException($"Rango inválido: {request.Range}");
         }
 
-        var sensor = SensorCatalog.GetSensor(request.SensorId)
+        var sensor = await _catalog.GetSensorAsync(request.SensorId, cancellationToken)
                      ?? throw new NotFoundException($"Sensor no encontrado: {request.SensorId}");
 
         var readings = await _visualiti.FetchMoistureReadingsForRangeAsync(

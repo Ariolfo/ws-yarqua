@@ -109,7 +109,7 @@ public static partial class SensorCatalog
     {
         var trimmed = sensorId.Trim();
         var match = LogicalIdRegex.Match(trimmed);
-        if (match.Success && BySerial.ContainsKey(match.Groups["physical"].Value))
+        if (match.Success)
         {
             return (match.Groups["physical"].Value, int.Parse(match.Groups["channel"].Value));
         }

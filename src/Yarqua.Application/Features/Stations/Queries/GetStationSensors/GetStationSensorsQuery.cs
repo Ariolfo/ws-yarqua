@@ -21,13 +21,15 @@ public class GetStationSensorsQuery : IRequest<IReadOnlyList<SensorDto>>
 public class GetStationSensorsQueryHandler : IRequestHandler<GetStationSensorsQuery, IReadOnlyList<SensorDto>>
 {
     private readonly IVisualitiClient _visualiti;
+    private readonly ISensorCatalogService _catalog;
 
     /// <summary>
     /// Inicializa el handler.
     /// </summary>
-    public GetStationSensorsQueryHandler(IVisualitiClient visualiti)
+    public GetStationSensorsQueryHandler(IVisualitiClient visualiti, ISensorCatalogService catalog)
     {
         _visualiti = visualiti;
+        _catalog = catalog;
     }
 
     /// <summary>
@@ -50,17 +52,20 @@ public class GetStationSensorsQueryHandler : IRequestHandler<GetStationSensorsQu
 
         List<PhysicalSensor> sensors;
         string responseStationId;
+        var all = await _catalog.ListSensorsAsync(cancellationToken);
 
         if (kind == "serial")
         {
-            var sensor = SensorCatalog.GetSensor(key)
+            var sensor = all.FirstOrDefault(s =>
+                             string.Equals(s.Serial, key, StringComparison.OrdinalIgnoreCase))
+                         ?? await _catalog.GetSensorAsync(key, cancellationToken)
                          ?? throw new NotFoundException($"Estación no encontrada: {request.StationId}");
             sensors = [sensor];
             responseStationId = StationIds.EncodeStationId(key);
         }
         else
         {
-            sensors = SensorCatalog.ListSensors()
+            sensors = all
                 .Where(s => s.Finca is not null && StationIds.FincaSlug(s.Finca) == key)
                 .ToList();
             if (sensors.Count == 0)

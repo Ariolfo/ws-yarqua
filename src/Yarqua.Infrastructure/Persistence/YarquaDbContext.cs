@@ -37,6 +37,18 @@ public class YarquaDbContext : DbContext
     /// <summary>Dispositivos vinculados.</summary>
     public DbSet<YarqtbUsuarioDispositivo> UsuarioDispositivos => Set<YarqtbUsuarioDispositivo>();
 
+    /// <summary>Redes de sensores.</summary>
+    public DbSet<YarqtbRed> Redes => Set<YarqtbRed>();
+
+    /// <summary>Cultivos.</summary>
+    public DbSet<YarqtbCultivo> Cultivos => Set<YarqtbCultivo>();
+
+    /// <summary>Sensores.</summary>
+    public DbSet<YarqtbSensor> Sensores => Set<YarqtbSensor>();
+
+    /// <summary>Métodos para capacidad de campo.</summary>
+    public DbSet<YarqtbMetodoCC> MetodosCC => Set<YarqtbMetodoCC>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
