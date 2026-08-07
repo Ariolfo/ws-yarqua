@@ -6,54 +6,73 @@ using Yarqua.Application.Services;
 namespace Yarqua.Application.Features.Stations.Queries.GetNearbyStations;
 
 /// <summary>
-/// Consulta estaciones cercanas por Haversine sobre el catálogo estático.
+/// Consulta estaciones geolocalizadas (cercanas o catálogo completo).
 /// </summary>
 public class GetNearbyStationsQuery : IRequest<IReadOnlyList<StationDto>>
 {
-    /// <summary>Latitud del usuario.</summary>
+    /// <summary>Latitud del usuario (para distancia; opcional si AllGeolocated).</summary>
     public double Lat { get; set; }
 
     /// <summary>Longitud del usuario.</summary>
     public double Lng { get; set; }
 
-    /// <summary>Radio en km (default 50).</summary>
+    /// <summary>Radio en km (default 50). Ignorado si AllGeolocated.</summary>
     public double Radius { get; set; } = 50;
 
     /// <summary>Si true, incluye sensores con lecturas cacheadas.</summary>
     public bool IncludeSensors { get; set; }
+
+    /// <summary>Si true, devuelve todas las estaciones geolocalizadas (CO/EC/HN).</summary>
+    public bool AllGeolocated { get; set; }
 }
 
 /// <summary>
-/// Handler de estaciones cercanas.
+/// Handler de estaciones.
 /// </summary>
 public class GetNearbyStationsQueryHandler : IRequestHandler<GetNearbyStationsQuery, IReadOnlyList<StationDto>>
 {
     private readonly IVisualitiClient _visualiti;
+    private readonly ISensorCatalogService _catalog;
 
     /// <summary>
     /// Inicializa el handler.
     /// </summary>
-    public GetNearbyStationsQueryHandler(IVisualitiClient visualiti)
+    public GetNearbyStationsQueryHandler(IVisualitiClient visualiti, ISensorCatalogService catalog)
     {
         _visualiti = visualiti;
+        _catalog = catalog;
     }
 
     /// <summary>
-    /// Obtiene estaciones dentro del radio.
+    /// Obtiene estaciones dentro del radio o el catálogo completo.
     /// </summary>
     public async Task<IReadOnlyList<StationDto>> Handle(
         GetNearbyStationsQuery request,
         CancellationToken cancellationToken)
     {
-        var radiusKm = Math.Clamp(request.Radius <= 0 ? 50 : request.Radius, 0.1, 500);
-        var radiusM = radiusKm * 1000.0;
+        var geolocated = await _catalog.ListGeolocatedSensorsAsync(cancellationToken);
 
-        var nearby = SensorCatalog.ListGeolocatedSensors()
-            .Select(s => (Sensor: s, Dist: SensorCatalog.HaversineM(
-                request.Lat, request.Lng, s.Latitud!.Value, s.Longitud!.Value)))
-            .Where(x => x.Dist <= radiusM)
-            .OrderBy(x => x.Dist)
-            .ToList();
+        IEnumerable<(PhysicalSensor Sensor, double Dist)> scored;
+        if (request.AllGeolocated)
+        {
+            scored = geolocated.Select(s => (
+                Sensor: s,
+                Dist: SensorCatalog.HaversineM(
+                    request.Lat, request.Lng, s.Latitud!.Value, s.Longitud!.Value)));
+        }
+        else
+        {
+            var radiusKm = Math.Clamp(request.Radius <= 0 ? 50 : request.Radius, 0.1, 500);
+            var radiusM = radiusKm * 1000.0;
+            scored = geolocated
+                .Select(s => (
+                    Sensor: s,
+                    Dist: SensorCatalog.HaversineM(
+                        request.Lat, request.Lng, s.Latitud!.Value, s.Longitud!.Value)))
+                .Where(x => x.Dist <= radiusM);
+        }
+
+        var nearby = scored.OrderBy(x => x.Dist).ToList();
 
         var grouped = new Dictionary<string, (string Nombre, List<PhysicalSensor> Sensors, double MinDist)>(
             StringComparer.Ordinal);

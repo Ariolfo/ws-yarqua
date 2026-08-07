@@ -25,15 +25,16 @@ public class StationsController : ControllerBase
     }
 
     /// <summary>
-    /// Lista estaciones cercanas por Haversine.
+    /// Lista estaciones cercanas o el catálogo geolocalizado completo.
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<StationDto>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<IReadOnlyList<StationDto>>>> GetNearby(
-        [FromQuery] double lat,
-        [FromQuery] double lng,
+        [FromQuery] double lat = 0,
+        [FromQuery] double lng = 0,
         [FromQuery] double radius = 50,
         [FromQuery] bool includeSensors = false,
+        [FromQuery] bool all = false,
         CancellationToken cancellationToken = default)
     {
         var data = await _mediator.Send(
@@ -43,6 +44,7 @@ public class StationsController : ControllerBase
                 Lng = lng,
                 Radius = radius,
                 IncludeSensors = includeSensors,
+                AllGeolocated = all,
             },
             cancellationToken);
         return Ok(ApiResponse<IReadOnlyList<StationDto>>.Ok(data));
