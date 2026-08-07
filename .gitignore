@@ -15,3 +15,6 @@
 ## Logs / test
 TestResults/
 *.log
+
+# Backups locales de SQL Server
+database/backups/
