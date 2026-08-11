@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
 
@@ -37,11 +37,11 @@ public class GetCitiesQueryHandler : IRequestHandler<GetCitiesQuery, IReadOnlyLi
     /// <summary>
     /// Obtiene ciudades filtradas.
     /// </summary>
-    public Task<IReadOnlyList<GeoCityDto>> Handle(
+    public ValueTask<IReadOnlyList<GeoCityDto>> Handle(
         GetCitiesQuery request,
         CancellationToken cancellationToken)
     {
         var limit = Math.Clamp(request.Limit <= 0 ? 2000 : request.Limit, 1, 5000);
-        return _geo.GetCitiesByDepoIdAsync(request.DepoId, request.Q, limit, cancellationToken);
+        return new(_geo.GetCitiesByDepoIdAsync(request.DepoId, request.Q, limit, cancellationToken));
     }
 }

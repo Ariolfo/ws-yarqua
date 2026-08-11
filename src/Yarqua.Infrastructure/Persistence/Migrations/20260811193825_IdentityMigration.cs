@@ -12,23 +12,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "YarqtbGrupo",
-                columns: table => new
-                {
-                    Grup_Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Grup_Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Grup_Descripcion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Grup_Rol = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Grup_Activo = table.Column<bool>(type: "bit", nullable: false),
-                    Grup_FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_YarqtbGrupo", x => x.Grup_Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "YarqtbRol",
                 columns: table => new
                 {
@@ -121,31 +104,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "YarqtbUsuarioGrupo",
-                columns: table => new
-                {
-                    Usua_Id = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
-                    Grup_Id = table.Column<int>(type: "int", nullable: false),
-                    Ugr_FechaAsignacion = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_YarqtbUsuarioGrupo", x => new { x.Usua_Id, x.Grup_Id });
-                    table.ForeignKey(
-                        name: "FK_YarqtbUsuarioGrupo_YarqtbGrupo_Grup_Id",
-                        column: x => x.Grup_Id,
-                        principalTable: "YarqtbGrupo",
-                        principalColumn: "Grup_Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_YarqtbUsuarioGrupo_YarqtbUsuario_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
-                        principalTable: "YarqtbUsuario",
-                        principalColumn: "Usua_Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "YarqtbUsuarioLogin",
                 columns: table => new
                 {
@@ -210,12 +168,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_YarqtbGrupo_Grup_Nombre",
-                table: "YarqtbGrupo",
-                column: "Grup_Nombre",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 table: "YarqtbRol",
                 column: "NormalizedName",
@@ -250,16 +202,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_YarqtbUsuarioGrupo_ApplicationUserId",
-                table: "YarqtbUsuarioGrupo",
-                column: "ApplicationUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_YarqtbUsuarioGrupo_Grup_Id",
-                table: "YarqtbUsuarioGrupo",
-                column: "Grup_Id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_YarqtbUsuarioLogin_UserId",
                 table: "YarqtbUsuarioLogin",
                 column: "UserId");
@@ -280,9 +222,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
                 name: "YarqtbUsuarioClaim");
 
             migrationBuilder.DropTable(
-                name: "YarqtbUsuarioGrupo");
-
-            migrationBuilder.DropTable(
                 name: "YarqtbUsuarioLogin");
 
             migrationBuilder.DropTable(
@@ -290,9 +229,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "YarqtbUsuarioToken");
-
-            migrationBuilder.DropTable(
-                name: "YarqtbGrupo");
 
             migrationBuilder.DropTable(
                 name: "YarqtbRol");

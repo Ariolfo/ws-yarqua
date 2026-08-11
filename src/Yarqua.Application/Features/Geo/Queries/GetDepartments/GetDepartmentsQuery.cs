@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
 
@@ -31,8 +31,8 @@ public class GetDepartmentsQueryHandler : IRequestHandler<GetDepartmentsQuery, I
     /// <summary>
     /// Obtiene departamentos del país.
     /// </summary>
-    public Task<IReadOnlyList<GeoDepartmentDto>> Handle(
+    public ValueTask<IReadOnlyList<GeoDepartmentDto>> Handle(
         GetDepartmentsQuery request,
         CancellationToken cancellationToken) =>
-        _geo.GetDepartmentsByPaisIdAsync(request.PaisId, cancellationToken);
+        new(_geo.GetDepartmentsByPaisIdAsync(request.PaisId, cancellationToken));
 }

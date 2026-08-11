@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Yarqua.Application.Common.Exceptions;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
@@ -39,7 +39,7 @@ public class GetSensorWithHistoryQueryHandler
     /// <summary>
     /// Obtiene sensor (última lectura = último punto) e histórico del rango.
     /// </summary>
-    public async Task<SensorWithHistoryDto> Handle(
+    public async ValueTask<SensorWithHistoryDto> Handle(
         GetSensorWithHistoryQuery request,
         CancellationToken cancellationToken)
     {

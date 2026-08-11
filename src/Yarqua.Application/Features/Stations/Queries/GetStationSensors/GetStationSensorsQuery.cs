@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Yarqua.Application.Common.Exceptions;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
@@ -35,7 +35,7 @@ public class GetStationSensorsQueryHandler : IRequestHandler<GetStationSensorsQu
     /// <summary>
     /// Obtiene sensores de la estación con lecturas en vivo.
     /// </summary>
-    public async Task<IReadOnlyList<SensorDto>> Handle(
+    public async ValueTask<IReadOnlyList<SensorDto>> Handle(
         GetStationSensorsQuery request,
         CancellationToken cancellationToken)
     {

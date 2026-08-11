@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using DotNetEnv;
+using Mediator;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Yarqua.Api.Middleware;
@@ -26,6 +27,10 @@ try
 
     EnsureRequiredSecrets(builder.Configuration);
 
+    builder.Services.AddMediator(options =>
+    {
+        options.ServiceLifetime = ServiceLifetime.Transient;
+    });
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -77,7 +82,7 @@ try
 
     var app = builder.Build();
 
-    // Seed Identity roles on startup
+    // Seed Identity roles + admin de arranque
     using (var scope = app.Services.CreateScope())
     {
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -86,6 +91,8 @@ try
             if (!await roleManager.RoleExistsAsync(role))
                 await roleManager.CreateAsync(new IdentityRole(role));
         }
+
+        await SeedAdminUserAsync(scope.ServiceProvider, builder.Configuration);
     }
 
     app.UseSerilogRequestLogging(options =>
@@ -182,6 +189,49 @@ static void EnsureRequiredSecrets(IConfiguration configuration)
     throw new InvalidOperationException(
         "Faltan secretos de configuración: " + string.Join(", ", missing) +
         ". Use User Secrets (Development), variables de entorno o copie ws-yarqua/.env.example → .env");
+}
+
+// Crea (o promueve a Admin) el usuario de arranque definido en Seed:AdminEmail / Seed:AdminPassword.
+static async Task SeedAdminUserAsync(IServiceProvider services, IConfiguration configuration)
+{
+    var email = configuration["Seed:AdminEmail"];
+    var password = configuration["Seed:AdminPassword"];
+    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+    {
+        return;
+    }
+
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var normalizedEmail = email.Trim().ToLowerInvariant();
+    var user = await userManager.FindByEmailAsync(normalizedEmail);
+    if (user is null)
+    {
+        user = new ApplicationUser
+        {
+            UserName = normalizedEmail,
+            Email = normalizedEmail,
+            UsuaNombre = "Admin",
+            UsuaActivo = true,
+            UsuaFechaRegistro = DateTime.UtcNow,
+            UsuaFechaCreacion = DateTime.UtcNow,
+            UsuaFechaActualizacion = DateTime.UtcNow,
+        };
+
+        var result = await userManager.CreateAsync(user, password);
+        if (!result.Succeeded)
+        {
+            Log.Warning(
+                "No se pudo crear el usuario admin sembrado {Email}: {Errors}",
+                normalizedEmail,
+                string.Join("; ", result.Errors.Select(e => e.Description)));
+            return;
+        }
+    }
+
+    if (!await userManager.IsInRoleAsync(user, AppRoles.Admin))
+    {
+        await userManager.AddToRoleAsync(user, AppRoles.Admin);
+    }
 }
 
 /// <summary>

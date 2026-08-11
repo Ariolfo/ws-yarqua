@@ -12,7 +12,7 @@ using Yarqua.Infrastructure.Persistence;
 namespace Yarqua.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(YarquaDbContext))]
-    [Migration("20260811033332_IdentityMigration")]
+    [Migration("20260811193825_IdentityMigration")]
     partial class IdentityMigration
     {
         /// <inheritdoc />
@@ -283,191 +283,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbDevicePushToken", b =>
-                {
-                    b.Property<long>("DptId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("Dpt_Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("DptId"));
-
-                    b.Property<bool>("DptActivo")
-                        .HasColumnType("bit")
-                        .HasColumnName("Dpt_Activo");
-
-                    b.Property<DateTime>("DptFechaActualizacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Dpt_FechaActualizacion");
-
-                    b.Property<DateTime>("DptFechaRegistro")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Dpt_FechaRegistro");
-
-                    b.Property<string>("DptPlatform")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("Dpt_Platform");
-
-                    b.Property<string>("DptPushToken")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)")
-                        .HasColumnName("Dpt_PushToken");
-
-                    b.Property<string>("UsuaId")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)")
-                        .HasColumnName("Usua_Id");
-
-                    b.HasKey("DptId");
-
-                    b.HasIndex("DptPushToken")
-                        .IsUnique();
-
-                    b.ToTable("YarqtbDevicePushToken", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-                });
-
-            modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbEventoUsuario", b =>
-                {
-                    b.Property<long>("EvenId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("Even_Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("EvenId"));
-
-                    b.Property<string>("EvenEvento")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("Even_Evento");
-
-                    b.Property<DateOnly>("EvenFecha")
-                        .HasColumnType("date")
-                        .HasColumnName("Even_Fecha");
-
-                    b.Property<DateTime>("EvenFechaActualizacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Even_FechaActualizacion");
-
-                    b.Property<DateTime>("EvenFechaCreacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Even_FechaCreacion");
-
-                    b.Property<TimeOnly>("EvenHora")
-                        .HasColumnType("time")
-                        .HasColumnName("Even_Hora");
-
-                    b.Property<string>("EvenSensorId")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("Even_SensorId");
-
-                    b.Property<string>("UsuaNombre")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("Usua_Nombre");
-
-                    b.HasKey("EvenId");
-
-                    b.ToTable("YarqtbEventoUsuario", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-                });
-
-            modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbGrupo", b =>
-                {
-                    b.Property<int>("GrupId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Grup_Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GrupId"));
-
-                    b.Property<bool>("GrupActivo")
-                        .HasColumnType("bit")
-                        .HasColumnName("Grup_Activo");
-
-                    b.Property<string>("GrupDescripcion")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("Grup_Descripcion");
-
-                    b.Property<DateTime>("GrupFechaCreacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Grup_FechaCreacion");
-
-                    b.Property<string>("GrupNombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("Grup_Nombre");
-
-                    b.Property<string>("GrupRol")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("Grup_Rol");
-
-                    b.HasKey("GrupId");
-
-                    b.HasIndex("GrupNombre")
-                        .IsUnique();
-
-                    b.ToTable("YarqtbGrupo", (string)null);
-                });
-
-            modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbMetodoCC", b =>
-                {
-                    b.Property<int>("MetoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Meto_Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MetoId"));
-
-                    b.Property<bool>("MetoActivo")
-                        .HasColumnType("bit")
-                        .HasColumnName("Meto_Activo");
-
-                    b.Property<string>("MetoDescripcion")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("Meto_Descripcion");
-
-                    b.Property<DateTime>("MetoFechaActualizacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Meto_FechaActualizacion");
-
-                    b.Property<DateTime>("MetoFechaCreacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Meto_FechaCreacion");
-
-                    b.Property<string>("MetoNombre")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("Meto_Nombre");
-
-                    b.HasKey("MetoId");
-
-                    b.HasIndex("MetoNombre")
-                        .IsUnique();
-
-                    b.ToTable("YarqtbMetodoCC", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-                });
-
             modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbPais", b =>
                 {
                     b.Property<int>("PaisId")
@@ -606,72 +421,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
                         {
                             t.ExcludeFromMigrations();
                         });
-                });
-
-            modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbUsuarioDispositivo", b =>
-                {
-                    b.Property<string>("UdiDeviceId")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)")
-                        .HasColumnName("Udi_DeviceId");
-
-                    b.Property<bool>("UdiActivo")
-                        .HasColumnType("bit")
-                        .HasColumnName("Udi_Activo");
-
-                    b.Property<DateTime>("UdiFechaActualizacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Udi_FechaActualizacion");
-
-                    b.Property<DateTime>("UdiFechaRegistro")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Udi_FechaRegistro");
-
-                    b.Property<string>("UdiPlatform")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("Udi_Platform");
-
-                    b.Property<string>("UsuaId")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)")
-                        .HasColumnName("Usua_Id");
-
-                    b.HasKey("UdiDeviceId");
-
-                    b.ToTable("YarqtbUsuarioDispositivo", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-                });
-
-            modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbUsuarioGrupo", b =>
-                {
-                    b.Property<string>("UsuaId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Usua_Id");
-
-                    b.Property<int>("GrupId")
-                        .HasColumnType("int")
-                        .HasColumnName("Grup_Id");
-
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("UgrFechaAsignacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Ugr_FechaAsignacion");
-
-                    b.HasKey("UsuaId", "GrupId");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("GrupId");
-
-                    b.ToTable("YarqtbUsuarioGrupo", (string)null);
                 });
 
             modelBuilder.Entity("Yarqua.Infrastructure.Identity.ApplicationUser", b =>
@@ -869,21 +618,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
                     b.Navigation("Red");
                 });
 
-            modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbUsuarioGrupo", b =>
-                {
-                    b.HasOne("Yarqua.Infrastructure.Identity.ApplicationUser", null)
-                        .WithMany("Grupos")
-                        .HasForeignKey("ApplicationUserId");
-
-                    b.HasOne("Yarqua.Domain.Entities.YarqtbGrupo", "Grupo")
-                        .WithMany("Miembros")
-                        .HasForeignKey("GrupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Grupo");
-                });
-
             modelBuilder.Entity("Yarqua.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.HasOne("Yarqua.Domain.Entities.YarqtbCiudad", "Ciudad")
@@ -903,11 +637,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
                     b.Navigation("Ciudades");
                 });
 
-            modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbGrupo", b =>
-                {
-                    b.Navigation("Miembros");
-                });
-
             modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbPais", b =>
                 {
                     b.Navigation("Departamentos");
@@ -916,11 +645,6 @@ namespace Yarqua.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Yarqua.Domain.Entities.YarqtbRed", b =>
                 {
                     b.Navigation("Sensores");
-                });
-
-            modelBuilder.Entity("Yarqua.Infrastructure.Identity.ApplicationUser", b =>
-                {
-                    b.Navigation("Grupos");
                 });
 #pragma warning restore 612, 618
         }

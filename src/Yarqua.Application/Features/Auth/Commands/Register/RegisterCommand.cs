@@ -1,9 +1,8 @@
 using FluentValidation;
-using MediatR;
+using Mediator;
 using Yarqua.Application.Common.Exceptions;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
-using Yarqua.Domain.Entities;
 
 namespace Yarqua.Application.Features.Auth.Commands.Register;
 
@@ -29,12 +28,6 @@ public class RegisterCommand : IRequest<AuthDto>
 
     /// <summary>Ciudad.</summary>
     public string City { get; set; } = string.Empty;
-
-    /// <summary>Id estable del dispositivo (opcional).</summary>
-    public string? DeviceId { get; set; }
-
-    /// <summary>Plataforma: android, ios, web.</summary>
-    public string Platform { get; set; } = "android";
 }
 
 /// <summary>
@@ -51,43 +44,31 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
         RuleFor(x => x.Country).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Department).NotEmpty().MaximumLength(150);
         RuleFor(x => x.City).NotEmpty().MaximumLength(150);
-        RuleFor(x => x.DeviceId)
-            .MinimumLength(8).MaximumLength(64)
-            .When(x => !string.IsNullOrWhiteSpace(x.DeviceId));
     }
 }
 
 /// <summary>
-/// Handler de auto-registro: resuelve geo, crea usuario Identity con rol Visualizador y emite JWT.
+/// Handler de auto-registro: resuelve geo, crea usuario Identity con rol User y emite JWT.
 /// </summary>
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
 {
     private readonly IIdentityService _identity;
-    private readonly IEventoUsuarioRepository _eventos;
-    private readonly IUsuarioDispositivoRepository _dispositivos;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IGeoResolver _geoResolver;
     private readonly IJwtTokenService _jwt;
 
     /// <summary>Inicializa el handler.</summary>
     public RegisterCommandHandler(
         IIdentityService identity,
-        IEventoUsuarioRepository eventos,
-        IUsuarioDispositivoRepository dispositivos,
-        IUnitOfWork unitOfWork,
         IGeoResolver geoResolver,
         IJwtTokenService jwt)
     {
         _identity = identity;
-        _eventos = eventos;
-        _dispositivos = dispositivos;
-        _unitOfWork = unitOfWork;
         _geoResolver = geoResolver;
         _jwt = jwt;
     }
 
     /// <summary>Ejecuta el registro.</summary>
-    public async Task<AuthDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async ValueTask<AuthDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         ResolvedLocation location;
         try
@@ -116,43 +97,6 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
 
         var nombre = request.Name.Trim();
 
-        _eventos.Add(new YarqtbEventoUsuario
-        {
-            UsuaNombre = nombre,
-            EvenEvento = "REGISTRO",
-            EvenFecha = DateOnly.FromDateTime(DateTime.UtcNow),
-            EvenHora = TimeOnly.FromDateTime(DateTime.UtcNow),
-            EvenFechaCreacion = DateTime.UtcNow,
-            EvenFechaActualizacion = DateTime.UtcNow,
-        });
-
-        if (!string.IsNullOrWhiteSpace(request.DeviceId))
-        {
-            var platform = NormalizePlatform(request.Platform);
-            var device = await _dispositivos.FindByDeviceIdAsync(request.DeviceId!, cancellationToken);
-            if (device is null)
-            {
-                _dispositivos.Add(new YarqtbUsuarioDispositivo
-                {
-                    UdiDeviceId = request.DeviceId!,
-                    UsuaId = result.UserId,
-                    UdiPlatform = platform,
-                    UdiActivo = true,
-                    UdiFechaRegistro = DateTime.UtcNow,
-                    UdiFechaActualizacion = DateTime.UtcNow,
-                });
-            }
-            else
-            {
-                device.UsuaId = result.UserId;
-                device.UdiPlatform = platform;
-                device.UdiActivo = true;
-                device.UdiFechaActualizacion = DateTime.UtcNow;
-            }
-        }
-
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
         var roles = await _identity.GetUserRolesAsync(result.UserId, cancellationToken);
 
         return new AuthDto
@@ -170,11 +114,5 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
                 City = location.CiudadNombre,
             },
         };
-    }
-
-    private static string NormalizePlatform(string platform)
-    {
-        var p = platform.Trim().ToLowerInvariant();
-        return p is "android" or "ios" or "web" or "unknown" ? p : "unknown";
     }
 }

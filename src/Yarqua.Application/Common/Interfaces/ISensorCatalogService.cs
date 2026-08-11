@@ -53,21 +53,3 @@ public interface ICropCatalogService
     /// <summary>Resuelve perfil por nombre/texto (fallback Cacao).</summary>
     Task<CropMoistureProfile> ResolveAsync(string? cultivoOrText, CancellationToken cancellationToken = default);
 }
-
-/// <summary>
-/// Catálogo de métodos para capacidad de campo.
-/// </summary>
-public interface IMetodoCCCatalogService
-{
-    /// <summary>Lista métodos activos.</summary>
-    Task<IReadOnlyList<MetodoCCDto>> ListAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>Obtiene por id.</summary>
-    Task<MetodoCCDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
-
-    /// <summary>Crea un método.</summary>
-    Task<MetodoCCDto> CreateAsync(CreateMetodoCCRequest request, CancellationToken cancellationToken = default);
-
-    /// <summary>Actualiza un método.</summary>
-    Task<MetodoCCDto> UpdateAsync(int id, CreateMetodoCCRequest request, CancellationToken cancellationToken = default);
-}

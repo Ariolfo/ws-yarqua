@@ -1,15 +1,15 @@
 using FluentValidation;
-using MediatR;
+using Mediator;
 
 namespace Yarqua.Application.Common.Behaviors;
 
 /// <summary>
-/// Pipeline de MediatR que ejecuta validadores FluentValidation antes del handler.
+/// Pipeline de Mediator que ejecuta validadores FluentValidation antes del handler.
 /// </summary>
 /// <typeparam name="TRequest">Tipo de solicitud.</typeparam>
 /// <typeparam name="TResponse">Tipo de respuesta.</typeparam>
 public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : notnull
+    where TRequest : notnull, IMessage
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
 
@@ -29,14 +29,14 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
     /// <param name="next">Delegado siguiente.</param>
     /// <param name="cancellationToken">Token de cancelación.</param>
     /// <returns>Respuesta del handler.</returns>
-    public async Task<TResponse> Handle(
+    public async ValueTask<TResponse> Handle(
         TRequest request,
-        RequestHandlerDelegate<TResponse> next,
+        MessageHandlerDelegate<TRequest, TResponse> next,
         CancellationToken cancellationToken)
     {
         if (!_validators.Any())
         {
-            return await next();
+            return await next(request, cancellationToken);
         }
 
         var context = new ValidationContext<TRequest>(request);
@@ -50,6 +50,6 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
             throw new ValidationException(failures);
         }
 
-        return await next();
+        return await next(request, cancellationToken);
     }
 }

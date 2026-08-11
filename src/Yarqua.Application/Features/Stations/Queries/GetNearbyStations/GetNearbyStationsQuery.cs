@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
 using Yarqua.Application.Services;
@@ -46,7 +46,7 @@ public class GetNearbyStationsQueryHandler : IRequestHandler<GetNearbyStationsQu
     /// <summary>
     /// Obtiene estaciones dentro del radio o el catálogo completo.
     /// </summary>
-    public async Task<IReadOnlyList<StationDto>> Handle(
+    public async ValueTask<IReadOnlyList<StationDto>> Handle(
         GetNearbyStationsQuery request,
         CancellationToken cancellationToken)
     {

@@ -1,5 +1,5 @@
 using FluentValidation;
-using MediatR;
+using Mediator;
 using Yarqua.Application.Common.Exceptions;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
@@ -43,7 +43,7 @@ public class RefreshCommandHandler : IRequestHandler<RefreshCommand, RefreshDto>
     }
 
     /// <summary>Ejecuta el refresco.</summary>
-    public async Task<RefreshDto> Handle(RefreshCommand request, CancellationToken cancellationToken)
+    public async ValueTask<RefreshDto> Handle(RefreshCommand request, CancellationToken cancellationToken)
     {
         try
         {

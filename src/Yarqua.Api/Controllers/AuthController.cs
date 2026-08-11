@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Yarqua.Application.Common.Models;
 using Yarqua.Application.DTOs;
@@ -24,7 +24,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Registra un nuevo usuario con email y contraseña. Se le asigna el rol Visualizador.
+    /// Registra un nuevo usuario con email y contraseña. Se le asigna el rol User.
     /// </summary>
     [HttpPost("register")]
     [ProducesResponseType(typeof(ApiResponse<AuthDto>), StatusCodes.Status200OK)]

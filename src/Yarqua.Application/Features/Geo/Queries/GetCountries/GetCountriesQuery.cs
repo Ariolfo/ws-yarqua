@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
 
@@ -29,8 +29,8 @@ public class GetCountriesQueryHandler : IRequestHandler<GetCountriesQuery, IRead
     /// <summary>
     /// Obtiene países ordenados por nombre.
     /// </summary>
-    public Task<IReadOnlyList<GeoCountryDto>> Handle(
+    public ValueTask<IReadOnlyList<GeoCountryDto>> Handle(
         GetCountriesQuery request,
         CancellationToken cancellationToken) =>
-        _geo.GetCountriesAsync(cancellationToken);
+        new(_geo.GetCountriesAsync(cancellationToken));
 }

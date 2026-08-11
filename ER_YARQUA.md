@@ -15,8 +15,6 @@ erDiagram
     YarqtbCultivo ||--o{ YarqtbSensor : "asocia"
     YarqtbUsuario ||--o{ YarqtbUsuarioRol : "tiene"
     YarqtbRol ||--o{ YarqtbUsuarioRol : "agrupa"
-    YarqtbUsuario ||--o{ YarqtbUsuarioGrupo : "pertenece"
-    YarqtbGrupo ||--o{ YarqtbUsuarioGrupo : "contiene"
 
     YarqtbPais {
         int Pais_Id PK
@@ -91,21 +89,6 @@ erDiagram
         nvarchar ClaimValue
     }
 
-    YarqtbGrupo {
-        int Grup_Id PK
-        nvarchar Grup_Nombre
-        nvarchar Grup_Descripcion
-        nvarchar Grup_Rol "Admin|Operador|Visualizador"
-        bit Grup_Activo
-        datetime2 Grup_FechaCreacion
-    }
-
-    YarqtbUsuarioGrupo {
-        nvarchar Usua_Id PK "FK → YarqtbUsuario"
-        int Grup_Id PK "FK → YarqtbGrupo"
-        datetime2 Ugr_FechaAsignacion
-    }
-
     YarqtbRed {
         int Red_Id PK
         nvarchar Red_Nombre
@@ -135,42 +118,6 @@ erDiagram
         bit Sens_Activo
     }
 
-    YarqtbMetodoCC {
-        int MCC_Id PK
-        nvarchar MCC_Nombre
-        bit MCC_Activo
-    }
-
-    YarqtbEventoUsuario {
-        bigint Even_Id PK
-        nvarchar Usua_Nombre
-        date Even_Fecha
-        time Even_Hora
-        nvarchar Even_Evento
-        nvarchar Even_SensorId
-        datetime2 Even_FechaCreacion
-        datetime2 Even_FechaActualizacion
-    }
-
-    YarqtbUsuarioDispositivo {
-        nvarchar Udi_DeviceId PK
-        nvarchar Usua_Id
-        nvarchar Udi_Platform
-        bit Udi_Activo
-        datetime2 Udi_FechaRegistro
-        datetime2 Udi_FechaActualizacion
-    }
-
-    YarqtbDevicePushToken {
-        bigint Dpt_Id PK
-        nvarchar Usua_Id
-        nvarchar Dpt_PushToken
-        nvarchar Dpt_Platform
-        bit Dpt_Activo
-        datetime2 Dpt_FechaRegistro
-        datetime2 Dpt_FechaActualizacion
-    }
-
     YarqtbLog {
         int Id PK
         nvarchar Message
@@ -188,18 +135,13 @@ erDiagram
 
 ### Usuarios e Identity
 - **YarqtbUsuario**: usuario de la app; mapeado a `ApplicationUser : IdentityUser`. La PK `Usua_Id` es un GUID `nvarchar(450)` generado por Identity. Su ubicación es la ciudad (`Ciu_Id`).
-- **YarqtbRol / YarqtbUsuarioRol**: roles Identity (`Admin`, `Operador`, `Visualizador`). Sembrados al inicio en `Program.cs`.
+- **YarqtbRol / YarqtbUsuarioRol**: roles Identity (`Admin`, `User`). Sembrados al inicio en `Program.cs`.
 - **YarqtbUsuarioClaim / YarqtbUsuarioLogin / YarqtbUsuarioToken / YarqtbRolClaim**: tablas auxiliares de Identity.
-- **YarqtbGrupo**: agrupación lógica de usuarios con un rol asociado.
-- **YarqtbUsuarioGrupo**: relación muchos-a-muchos usuario ↔ grupo.
-- **YarqtbEventoUsuario**: auditoría de eventos (`REGISTRO`, `ACCESO`, `CONSULTA`).
-- **YarqtbUsuarioDispositivo** / **YarqtbDevicePushToken**: vínculo dispositivo y tokens push (referencia lógica al `Usua_Id` de Identity).
 
 ### Sensores y riego
 - **YarqtbRed**: red de sensores ligada a un país (p. ej. RED ASORUT, RED ECUADOR, RED HONDURA).
 - **YarqtbCultivo**: parámetros de riego (capacidad de campo, % máximo, % decisión).
 - **YarqtbSensor**: nodo/sensor; pertenece a una red y opcionalmente a un cultivo; guarda coordenadas, estado y conectividad.
-- **YarqtbMetodoCC**: catálogo de métodos para calcular capacidad de campo.
 
 ### Soporte
 - **YarqtbLog**: logs de aplicación (Serilog).
@@ -212,8 +154,6 @@ erDiagram
 | Usuario | Ciudad | `Ciu_Id` |
 | UsuarioRol | Usuario | `UserId` |
 | UsuarioRol | Rol | `RoleId` |
-| UsuarioGrupo | Usuario | `Usua_Id` |
-| UsuarioGrupo | Grupo | `Grup_Id` |
 | Red | País | `Pais_Id` |
 | Sensor | Red | `Red_Id` |
 | Sensor | Cultivo | `Cult_Id` (nullable) |

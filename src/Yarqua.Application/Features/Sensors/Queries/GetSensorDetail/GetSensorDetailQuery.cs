@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Yarqua.Application.Common.Exceptions;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
@@ -35,7 +35,7 @@ public class GetSensorDetailQueryHandler : IRequestHandler<GetSensorDetailQuery,
     /// <summary>
     /// Obtiene el sensor con última lectura.
     /// </summary>
-    public async Task<SensorDto> Handle(GetSensorDetailQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SensorDto> Handle(GetSensorDetailQuery request, CancellationToken cancellationToken)
     {
         var sensor = await _catalog.GetSensorAsync(request.SensorId, cancellationToken)
                      ?? throw new NotFoundException($"Sensor no encontrado: {request.SensorId}");

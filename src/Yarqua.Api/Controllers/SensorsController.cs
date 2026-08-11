@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Yarqua.Application.Common.Models;
@@ -22,7 +22,7 @@ public class SensorsController : ControllerBase
     /// <summary>
     /// Inicializa el controlador.
     /// </summary>
-    /// <param name="mediator">MediatR.</param>
+    /// <param name="mediator">Mediator.</param>
     public SensorsController(IMediator mediator)
     {
         _mediator = mediator;

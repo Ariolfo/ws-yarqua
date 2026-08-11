@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Yarqua.Application.Common.Models;
 using Yarqua.Application.DTOs;

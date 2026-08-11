@@ -78,12 +78,9 @@ public static class DependencyInjection
 
         // Repositories and application services
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IEventoUsuarioRepository, EventoUsuarioRepository>();
-        services.AddScoped<IUsuarioDispositivoRepository, UsuarioDispositivoRepository>();
         services.AddScoped<IGeoRepository, GeoRepository>();
         services.AddScoped<ISensorCatalogService, SensorCatalogService>();
         services.AddScoped<ICropCatalogService, CropCatalogService>();
-        services.AddScoped<IMetodoCCCatalogService, MetodoCCCatalogService>();
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IGeoResolver, GeoResolver>();

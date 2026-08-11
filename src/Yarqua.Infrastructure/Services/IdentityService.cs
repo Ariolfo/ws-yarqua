@@ -41,7 +41,7 @@ public class IdentityService : IIdentityService
         if (!result.Succeeded)
             return new RegisterResult(false, string.Empty, result.Errors.Select(e => e.Description).ToArray());
 
-        await _userManager.AddToRoleAsync(user, AppRoles.Visualizador);
+        await _userManager.AddToRoleAsync(user, AppRoles.User);
         return new RegisterResult(true, user.Id, []);
     }
 

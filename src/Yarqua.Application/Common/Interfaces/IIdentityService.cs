@@ -11,7 +11,7 @@ public record LoginResult(bool Success, string UserId, string DisplayName, strin
 /// </summary>
 public interface IIdentityService
 {
-    /// <summary>Registra un nuevo usuario y le asigna el rol Visualizador.</summary>
+    /// <summary>Registra un nuevo usuario y le asigna el rol User.</summary>
     Task<RegisterResult> RegisterAsync(
         string email,
         string password,

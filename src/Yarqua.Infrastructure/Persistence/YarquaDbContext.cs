@@ -25,15 +25,6 @@ public class YarquaDbContext : IdentityDbContext<ApplicationUser, IdentityRole, 
     /// <summary>Ciudades.</summary>
     public DbSet<YarqtbCiudad> Ciudades => Set<YarqtbCiudad>();
 
-    /// <summary>Eventos de usuario (auditoría).</summary>
-    public DbSet<YarqtbEventoUsuario> EventosUsuario => Set<YarqtbEventoUsuario>();
-
-    /// <summary>Tokens push.</summary>
-    public DbSet<YarqtbDevicePushToken> DevicePushTokens => Set<YarqtbDevicePushToken>();
-
-    /// <summary>Dispositivos vinculados.</summary>
-    public DbSet<YarqtbUsuarioDispositivo> UsuarioDispositivos => Set<YarqtbUsuarioDispositivo>();
-
     /// <summary>Redes de sensores.</summary>
     public DbSet<YarqtbRed> Redes => Set<YarqtbRed>();
 
@@ -42,15 +33,6 @@ public class YarquaDbContext : IdentityDbContext<ApplicationUser, IdentityRole, 
 
     /// <summary>Sensores.</summary>
     public DbSet<YarqtbSensor> Sensores => Set<YarqtbSensor>();
-
-    /// <summary>Métodos para capacidad de campo.</summary>
-    public DbSet<YarqtbMetodoCC> MetodosCC => Set<YarqtbMetodoCC>();
-
-    /// <summary>Grupos de usuarios.</summary>
-    public DbSet<YarqtbGrupo> Grupos => Set<YarqtbGrupo>();
-
-    /// <summary>Relación usuario-grupo.</summary>
-    public DbSet<YarqtbUsuarioGrupo> UsuarioGrupos => Set<YarqtbUsuarioGrupo>();
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)

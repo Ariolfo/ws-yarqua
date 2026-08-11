@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Yarqua.Application.Common.Exceptions;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
@@ -38,7 +38,7 @@ public class GetSensorHistoryQueryHandler : IRequestHandler<GetSensorHistoryQuer
     /// <summary>
     /// Obtiene puntos Cont Vol1/Vol2 (sensor_1 / sensor_2).
     /// </summary>
-    public async Task<IReadOnlyList<HistoryPointDto>> Handle(
+    public async ValueTask<IReadOnlyList<HistoryPointDto>> Handle(
         GetSensorHistoryQuery request,
         CancellationToken cancellationToken)
     {

@@ -28,7 +28,4 @@ public class ApplicationUser : IdentityUser
 
     /// <summary>Navegación a ciudad.</summary>
     public YarqtbCiudad? Ciudad { get; set; }
-
-    /// <summary>Grupos a los que pertenece.</summary>
-    public ICollection<YarqtbUsuarioGrupo> Grupos { get; set; } = [];
 }

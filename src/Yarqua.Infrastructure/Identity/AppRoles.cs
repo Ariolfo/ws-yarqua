@@ -6,8 +6,7 @@ namespace Yarqua.Infrastructure.Identity;
 public static class AppRoles
 {
     public const string Admin = "Admin";
-    public const string Operador = "Operador";
-    public const string Visualizador = "Visualizador";
+    public const string User = "User";
 
-    public static readonly string[] All = [Admin, Operador, Visualizador];
+    public static readonly string[] All = [Admin, User];
 }
