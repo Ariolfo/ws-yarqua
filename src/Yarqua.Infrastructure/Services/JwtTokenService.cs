@@ -9,17 +9,14 @@ using Yarqua.Infrastructure.Options;
 namespace Yarqua.Infrastructure.Services;
 
 /// <summary>
-/// Emisión y validación de JWT HS256.
+/// Emisión y validación de JWT HS256 con soporte de roles.
 /// </summary>
 public class JwtTokenService : IJwtTokenService
 {
     private readonly JwtOptions _options;
     private readonly SymmetricSecurityKey _key;
 
-    /// <summary>
-    /// Inicializa el servicio JWT.
-    /// </summary>
-    /// <param name="options">Opciones Jwt.</param>
+    /// <summary>Inicializa el servicio JWT.</summary>
     public JwtTokenService(IOptions<JwtOptions> options)
     {
         _options = options.Value;
@@ -27,12 +24,12 @@ public class JwtTokenService : IJwtTokenService
     }
 
     /// <inheritdoc />
-    public string CreateAccessToken(string userId, string? name = null) =>
-        CreateToken(userId, "access", TimeSpan.FromMinutes(_options.AccessMinutes), name);
+    public string CreateAccessToken(string userId, string? name = null, IEnumerable<string>? roles = null) =>
+        CreateToken(userId, "access", TimeSpan.FromMinutes(_options.AccessMinutes), name, roles);
 
     /// <inheritdoc />
     public string CreateRefreshToken(string userId, string? name = null) =>
-        CreateToken(userId, "refresh", TimeSpan.FromDays(_options.RefreshDays), name);
+        CreateToken(userId, "refresh", TimeSpan.FromDays(_options.RefreshDays), name, null);
 
     /// <inheritdoc />
     public (string Sub, string? Name) ValidateToken(string token, string expectedType)
@@ -51,9 +48,7 @@ public class JwtTokenService : IJwtTokenService
         var jwt = (JwtSecurityToken)validated;
         var type = jwt.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
         if (!string.Equals(type, expectedType, StringComparison.Ordinal))
-        {
             throw new SecurityTokenException("Tipo de token inválido");
-        }
 
         var sub = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                   ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
@@ -62,7 +57,7 @@ public class JwtTokenService : IJwtTokenService
         return (sub, name);
     }
 
-    private string CreateToken(string userId, string type, TimeSpan lifetime, string? name)
+    private string CreateToken(string userId, string type, TimeSpan lifetime, string? name, IEnumerable<string>? roles)
     {
         var now = DateTime.UtcNow;
         var claims = new List<Claim>
@@ -73,9 +68,10 @@ public class JwtTokenService : IJwtTokenService
         };
 
         if (!string.IsNullOrWhiteSpace(name))
-        {
             claims.Add(new Claim("name", name.Trim()));
-        }
+
+        if (roles is not null)
+            claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
         var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
@@ -87,6 +83,5 @@ public class JwtTokenService : IJwtTokenService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private static long Epoch(DateTime utc) =>
-        new DateTimeOffset(utc).ToUnixTimeSeconds();
+    private static long Epoch(DateTime utc) => new DateTimeOffset(utc).ToUnixTimeSeconds();
 }

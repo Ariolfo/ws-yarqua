@@ -46,22 +46,8 @@ BEGIN
 END
 GO
 
-IF OBJECT_ID(N'dbo.YarqtbUsuario', N'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.YarqtbUsuario (
-        Usua_Id                 BIGINT IDENTITY(1,1) NOT NULL,
-        Usua_Nombre             NVARCHAR(150) NOT NULL,
-        Ciu_Id                  INT           NOT NULL,
-        Usua_FechaRegistro      DATETIME2(7)  NOT NULL CONSTRAINT DF_YarqtbUsuario_FechaRegistro DEFAULT (SYSUTCDATETIME()),
-        Usua_FechaCreacion      DATETIME2(7)  NOT NULL CONSTRAINT DF_YarqtbUsuario_FechaCreacion DEFAULT (SYSUTCDATETIME()),
-        Usua_FechaActualizacion DATETIME2(7)  NOT NULL CONSTRAINT DF_YarqtbUsuario_FechaActualizacion DEFAULT (SYSUTCDATETIME()),
-        Usua_Activo             BIT           NOT NULL CONSTRAINT DF_YarqtbUsuario_Activo DEFAULT (1),
-        CONSTRAINT PK_YarqtbUsuario PRIMARY KEY (Usua_Id),
-        CONSTRAINT UQ_YarqtbUsuario_Nombre_Ciudad UNIQUE (Usua_Nombre, Ciu_Id),
-        CONSTRAINT FK_YarqtbUsuario_Ciudad FOREIGN KEY (Ciu_Id) REFERENCES dbo.YarqtbCiudad (Ciu_Id)
-    );
-END
-GO
+-- YarqtbUsuario is managed by EF Core (ASP.NET Identity / ApplicationUser).
+-- It is created by 'dotnet ef database update' with nvarchar(450) PK.
 
 IF OBJECT_ID(N'dbo.YarqtbEventoUsuario', N'U') IS NULL
 BEGIN

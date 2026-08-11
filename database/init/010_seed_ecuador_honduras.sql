@@ -23,13 +23,14 @@ WHEN NOT MATCHED THEN INSERT (Pais_Id, Pais_Nombre, Pais_Estado) VALUES (s.Pais_
 GO
 
 
-DELETE FROM dbo.YarqtbUsuario
-WHERE Ciu_Id IN (
-    SELECT c.Ciu_Id
-    FROM dbo.YarqtbCiudad c
-    INNER JOIN dbo.YarqtbDepartamento d ON d.Depo_Id = c.Depo_Id
-    WHERE d.Pais_Id IN (218, 340)
-);
+IF OBJECT_ID(N'dbo.YarqtbUsuario', N'U') IS NOT NULL
+    DELETE FROM dbo.YarqtbUsuario
+    WHERE Ciu_Id IN (
+        SELECT c.Ciu_Id
+        FROM dbo.YarqtbCiudad c
+        INNER JOIN dbo.YarqtbDepartamento d ON d.Depo_Id = c.Depo_Id
+        WHERE d.Pais_Id IN (218, 340)
+    );
 
 DELETE c
 FROM dbo.YarqtbCiudad c

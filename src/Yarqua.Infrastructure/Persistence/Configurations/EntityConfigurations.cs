@@ -10,7 +10,7 @@ public class YarqtbPaisConfiguration : IEntityTypeConfiguration<YarqtbPais>
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<YarqtbPais> builder)
     {
-        builder.ToTable("YarqtbPais");
+        builder.ToTable("YarqtbPais", t => t.ExcludeFromMigrations());
         builder.HasKey(x => x.PaisId);
         builder.Property(x => x.PaisId).HasColumnName("Pais_Id");
         builder.Property(x => x.PaisNombre).HasColumnName("Pais_Nombre").HasMaxLength(255).IsRequired();
@@ -24,7 +24,7 @@ public class YarqtbDepartamentoConfiguration : IEntityTypeConfiguration<YarqtbDe
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<YarqtbDepartamento> builder)
     {
-        builder.ToTable("YarqtbDepartamento");
+        builder.ToTable("YarqtbDepartamento", t => t.ExcludeFromMigrations());
         builder.HasKey(x => x.DepoId);
         builder.Property(x => x.DepoId).HasColumnName("Depo_Id");
         builder.Property(x => x.PaisId).HasColumnName("Pais_Id");
@@ -41,7 +41,7 @@ public class YarqtbCiudadConfiguration : IEntityTypeConfiguration<YarqtbCiudad>
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<YarqtbCiudad> builder)
     {
-        builder.ToTable("YarqtbCiudad");
+        builder.ToTable("YarqtbCiudad", t => t.ExcludeFromMigrations());
         builder.HasKey(x => x.CiuId);
         builder.Property(x => x.CiuId).HasColumnName("Ciu_Id");
         builder.Property(x => x.CiuNombre).HasColumnName("Ciu_Nombre").HasMaxLength(255).IsRequired();
@@ -52,33 +52,13 @@ public class YarqtbCiudadConfiguration : IEntityTypeConfiguration<YarqtbCiudad>
     }
 }
 
-/// <summary>Configuración EF de YarqtbUsuario.</summary>
-public class YarqtbUsuarioConfiguration : IEntityTypeConfiguration<YarqtbUsuario>
-{
-    /// <inheritdoc />
-    public void Configure(EntityTypeBuilder<YarqtbUsuario> builder)
-    {
-        builder.ToTable("YarqtbUsuario");
-        builder.HasKey(x => x.UsuaId);
-        builder.Property(x => x.UsuaId).HasColumnName("Usua_Id").ValueGeneratedOnAdd();
-        builder.Property(x => x.UsuaNombre).HasColumnName("Usua_Nombre").HasMaxLength(150).IsRequired();
-        builder.Property(x => x.CiuId).HasColumnName("Ciu_Id");
-        builder.Property(x => x.UsuaFechaRegistro).HasColumnName("Usua_FechaRegistro");
-        builder.Property(x => x.UsuaFechaCreacion).HasColumnName("Usua_FechaCreacion");
-        builder.Property(x => x.UsuaFechaActualizacion).HasColumnName("Usua_FechaActualizacion");
-        builder.Property(x => x.UsuaActivo).HasColumnName("Usua_Activo");
-        builder.HasIndex(x => new { x.UsuaNombre, x.CiuId }).IsUnique();
-        builder.HasOne(x => x.Ciudad).WithMany().HasForeignKey(x => x.CiuId);
-    }
-}
-
 /// <summary>Configuración EF de YarqtbEventoUsuario.</summary>
 public class YarqtbEventoUsuarioConfiguration : IEntityTypeConfiguration<YarqtbEventoUsuario>
 {
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<YarqtbEventoUsuario> builder)
     {
-        builder.ToTable("YarqtbEventoUsuario");
+        builder.ToTable("YarqtbEventoUsuario", t => t.ExcludeFromMigrations());
         builder.HasKey(x => x.EvenId);
         builder.Property(x => x.EvenId).HasColumnName("Even_Id").ValueGeneratedOnAdd();
         builder.Property(x => x.UsuaNombre).HasColumnName("Usua_Nombre").HasMaxLength(150).IsRequired();
@@ -97,7 +77,7 @@ public class YarqtbDevicePushTokenConfiguration : IEntityTypeConfiguration<Yarqt
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<YarqtbDevicePushToken> builder)
     {
-        builder.ToTable("YarqtbDevicePushToken");
+        builder.ToTable("YarqtbDevicePushToken", t => t.ExcludeFromMigrations());
         builder.HasKey(x => x.DptId);
         builder.Property(x => x.DptId).HasColumnName("Dpt_Id").ValueGeneratedOnAdd();
         builder.Property(x => x.UsuaId).HasColumnName("Usua_Id").HasMaxLength(64).IsRequired();
@@ -116,7 +96,7 @@ public class YarqtbUsuarioDispositivoConfiguration : IEntityTypeConfiguration<Ya
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<YarqtbUsuarioDispositivo> builder)
     {
-        builder.ToTable("YarqtbUsuarioDispositivo");
+        builder.ToTable("YarqtbUsuarioDispositivo", t => t.ExcludeFromMigrations());
         builder.HasKey(x => x.UdiDeviceId);
         builder.Property(x => x.UdiDeviceId).HasColumnName("Udi_DeviceId").HasMaxLength(64);
         builder.Property(x => x.UsuaId).HasColumnName("Usua_Id").HasMaxLength(64).IsRequired();

@@ -7,13 +7,15 @@ USE [dbYarqua];
 GO
 
 -- Reemplazar solo Colombia para alinear IDs/códigos con el catálogo maestro
-DELETE FROM dbo.YarqtbUsuario
-WHERE Ciu_Id IN (
-    SELECT c.Ciu_Id
-    FROM dbo.YarqtbCiudad c
-    INNER JOIN dbo.YarqtbDepartamento d ON d.Depo_Id = c.Depo_Id
-    WHERE d.Pais_Id = 170
-);
+-- YarqtbUsuario es administrado por EF; solo limpiar si ya existe la tabla.
+IF OBJECT_ID(N'dbo.YarqtbUsuario', N'U') IS NOT NULL
+    DELETE FROM dbo.YarqtbUsuario
+    WHERE Ciu_Id IN (
+        SELECT c.Ciu_Id
+        FROM dbo.YarqtbCiudad c
+        INNER JOIN dbo.YarqtbDepartamento d ON d.Depo_Id = c.Depo_Id
+        WHERE d.Pais_Id = 170
+    );
 
 DELETE c FROM dbo.YarqtbCiudad c INNER JOIN dbo.YarqtbDepartamento d ON d.Depo_Id = c.Depo_Id WHERE d.Pais_Id = 170;
 DELETE FROM dbo.YarqtbDepartamento WHERE Pais_Id = 170;

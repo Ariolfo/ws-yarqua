@@ -2,13 +2,14 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Yarqua.Application.Common.Models;
 using Yarqua.Application.DTOs;
+using Yarqua.Application.Features.Auth.Commands.Login;
 using Yarqua.Application.Features.Auth.Commands.Refresh;
 using Yarqua.Application.Features.Auth.Commands.Register;
 
 namespace Yarqua.Api.Controllers;
 
 /// <summary>
-/// Endpoints de autenticación (registro y refresh).
+/// Endpoints de autenticación (registro, login y refresh).
 /// </summary>
 [ApiController]
 [Route("api/v1/auth")]
@@ -16,23 +17,18 @@ public class AuthController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    /// <summary>
-    /// Inicializa el controlador.
-    /// </summary>
-    /// <param name="mediator">MediatR.</param>
+    /// <summary>Inicializa el controlador.</summary>
     public AuthController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
     /// <summary>
-    /// Registra o actualiza un usuario y emite tokens JWT.
+    /// Registra un nuevo usuario con email y contraseña. Se le asigna el rol Visualizador.
     /// </summary>
-    /// <param name="command">Datos de registro.</param>
-    /// <param name="cancellationToken">Token de cancelación.</param>
-    /// <returns>Sobre con AuthDto.</returns>
     [HttpPost("register")]
     [ProducesResponseType(typeof(ApiResponse<AuthDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse<AuthDto>>> Register(
         [FromBody] RegisterCommand command,
         CancellationToken cancellationToken)
@@ -42,13 +38,25 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Renueva access y refresh tokens.
+    /// Inicia sesión con email y contraseña. Devuelve tokens JWT con roles.
     /// </summary>
-    /// <param name="command">Token de refresco.</param>
-    /// <param name="cancellationToken">Token de cancelación.</param>
-    /// <returns>Sobre con RefreshDto.</returns>
+    [HttpPost("login")]
+    [ProducesResponseType(typeof(ApiResponse<AuthDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<ApiResponse<AuthDto>>> Login(
+        [FromBody] LoginCommand command,
+        CancellationToken cancellationToken)
+    {
+        var data = await _mediator.Send(command, cancellationToken);
+        return Ok(ApiResponse<AuthDto>.Ok(data, "Sesión iniciada"));
+    }
+
+    /// <summary>
+    /// Renueva access y refresh tokens (incluye roles actualizados).
+    /// </summary>
     [HttpPost("refresh")]
     [ProducesResponseType(typeof(ApiResponse<RefreshDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ApiResponse<RefreshDto>>> Refresh(
         [FromBody] RefreshCommand command,
         CancellationToken cancellationToken)

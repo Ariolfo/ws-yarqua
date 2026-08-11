@@ -5,30 +5,18 @@ using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.DTOs;
 using Yarqua.Domain.Entities;
 
-namespace Yarqua.Application.Features.Auth.Commands.Register;
+namespace Yarqua.Application.Features.Auth.Commands.Login;
 
 /// <summary>
-/// Comando de auto-registro de usuario.
+/// Comando de inicio de sesión con email y contraseña.
 /// </summary>
-public class RegisterCommand : IRequest<AuthDto>
+public class LoginCommand : IRequest<AuthDto>
 {
-    /// <summary>Correo electrónico (usado como login).</summary>
+    /// <summary>Correo electrónico.</summary>
     public string Email { get; set; } = string.Empty;
 
-    /// <summary>Contraseña (mínimo 8 caracteres).</summary>
+    /// <summary>Contraseña.</summary>
     public string Password { get; set; } = string.Empty;
-
-    /// <summary>Nombre para mostrar.</summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>País (nombre).</summary>
-    public string Country { get; set; } = string.Empty;
-
-    /// <summary>Departamento.</summary>
-    public string Department { get; set; } = string.Empty;
-
-    /// <summary>Ciudad.</summary>
-    public string City { get; set; } = string.Empty;
 
     /// <summary>Id estable del dispositivo (opcional).</summary>
     public string? DeviceId { get; set; }
@@ -38,19 +26,15 @@ public class RegisterCommand : IRequest<AuthDto>
 }
 
 /// <summary>
-/// Validador del comando de registro.
+/// Validador del comando de login.
 /// </summary>
-public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
+public class LoginCommandValidator : AbstractValidator<LoginCommand>
 {
     /// <summary>Configura reglas de validación.</summary>
-    public RegisterCommandValidator()
+    public LoginCommandValidator()
     {
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(256);
-        RuleFor(x => x.Password).NotEmpty().MinimumLength(8).MaximumLength(100);
-        RuleFor(x => x.Name).NotEmpty().MinimumLength(2).MaximumLength(150);
-        RuleFor(x => x.Country).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.Department).NotEmpty().MaximumLength(150);
-        RuleFor(x => x.City).NotEmpty().MaximumLength(150);
+        RuleFor(x => x.Password).NotEmpty().MinimumLength(1);
         RuleFor(x => x.DeviceId)
             .MinimumLength(8).MaximumLength(64)
             .When(x => !string.IsNullOrWhiteSpace(x.DeviceId));
@@ -58,68 +42,46 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 }
 
 /// <summary>
-/// Handler de auto-registro: resuelve geo, crea usuario Identity con rol Visualizador y emite JWT.
+/// Handler de login: valida credenciales, registra evento ACCESO y emite JWT con roles.
 /// </summary>
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
+public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthDto>
 {
     private readonly IIdentityService _identity;
     private readonly IEventoUsuarioRepository _eventos;
     private readonly IUsuarioDispositivoRepository _dispositivos;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IGeoResolver _geoResolver;
     private readonly IJwtTokenService _jwt;
 
     /// <summary>Inicializa el handler.</summary>
-    public RegisterCommandHandler(
+    public LoginCommandHandler(
         IIdentityService identity,
         IEventoUsuarioRepository eventos,
         IUsuarioDispositivoRepository dispositivos,
         IUnitOfWork unitOfWork,
-        IGeoResolver geoResolver,
         IJwtTokenService jwt)
     {
         _identity = identity;
         _eventos = eventos;
         _dispositivos = dispositivos;
         _unitOfWork = unitOfWork;
-        _geoResolver = geoResolver;
         _jwt = jwt;
     }
 
-    /// <summary>Ejecuta el registro.</summary>
-    public async Task<AuthDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    /// <summary>Ejecuta el login.</summary>
+    public async Task<AuthDto> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        ResolvedLocation location;
-        try
-        {
-            location = await _geoResolver.ResolveAsync(
-                request.Country, request.Department, request.City, cancellationToken);
-        }
-        catch (AppException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new AppException(ex.Message);
-        }
-
-        var result = await _identity.RegisterAsync(
+        var result = await _identity.LoginAsync(
             request.Email.Trim().ToLowerInvariant(),
             request.Password,
-            request.Name.Trim(),
-            location.CiuId,
             cancellationToken);
 
         if (!result.Success)
-            throw new AppException(string.Join("; ", result.Errors));
-
-        var nombre = request.Name.Trim();
+            throw new UnauthorizedAppException("Credenciales inválidas o cuenta bloqueada.");
 
         _eventos.Add(new YarqtbEventoUsuario
         {
-            UsuaNombre = nombre,
-            EvenEvento = "REGISTRO",
+            UsuaNombre = result.DisplayName,
+            EvenEvento = "ACCESO",
             EvenFecha = DateOnly.FromDateTime(DateTime.UtcNow),
             EvenHora = TimeOnly.FromDateTime(DateTime.UtcNow),
             EvenFechaCreacion = DateTime.UtcNow,
@@ -153,21 +115,16 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var roles = await _identity.GetUserRolesAsync(result.UserId, cancellationToken);
-
         return new AuthDto
         {
-            AccessToken = _jwt.CreateAccessToken(result.UserId, nombre, roles),
-            RefreshToken = _jwt.CreateRefreshToken(result.UserId, nombre),
+            AccessToken = _jwt.CreateAccessToken(result.UserId, result.DisplayName, result.Roles),
+            RefreshToken = _jwt.CreateRefreshToken(result.UserId, result.DisplayName),
             User = new UserDto
             {
                 Id = result.UserId,
-                Name = nombre,
-                Email = request.Email.Trim().ToLowerInvariant(),
-                Roles = roles,
-                Country = location.PaisNombre,
-                Department = location.DepartamentoNombre,
-                City = location.CiudadNombre,
+                Name = result.DisplayName,
+                Email = result.Email,
+                Roles = result.Roles,
             },
         };
     }

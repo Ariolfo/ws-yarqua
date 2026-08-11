@@ -1,17 +1,17 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Yarqua.Domain.Entities;
+using Yarqua.Infrastructure.Identity;
 
 namespace Yarqua.Infrastructure.Persistence;
 
 /// <summary>
-/// Contexto EF Core mapeado a las tablas Yarqtb* (uso interno de repositorios).
+/// Contexto EF Core con soporte de Identity. Todas las tablas usan prefijo Yarqtb.
 /// </summary>
-public class YarquaDbContext : DbContext
+public class YarquaDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
 {
-    /// <summary>
-    /// Inicializa el contexto.
-    /// </summary>
-    /// <param name="options">Opciones de EF Core.</param>
+    /// <summary>Inicializa el contexto.</summary>
     public YarquaDbContext(DbContextOptions<YarquaDbContext> options) : base(options)
     {
     }
@@ -25,10 +25,7 @@ public class YarquaDbContext : DbContext
     /// <summary>Ciudades.</summary>
     public DbSet<YarqtbCiudad> Ciudades => Set<YarqtbCiudad>();
 
-    /// <summary>Usuarios.</summary>
-    public DbSet<YarqtbUsuario> Usuarios => Set<YarqtbUsuario>();
-
-    /// <summary>Eventos de usuario.</summary>
+    /// <summary>Eventos de usuario (auditoría).</summary>
     public DbSet<YarqtbEventoUsuario> EventosUsuario => Set<YarqtbEventoUsuario>();
 
     /// <summary>Tokens push.</summary>
@@ -49,10 +46,27 @@ public class YarquaDbContext : DbContext
     /// <summary>Métodos para capacidad de campo.</summary>
     public DbSet<YarqtbMetodoCC> MetodosCC => Set<YarqtbMetodoCC>();
 
+    /// <summary>Grupos de usuarios.</summary>
+    public DbSet<YarqtbGrupo> Grupos => Set<YarqtbGrupo>();
+
+    /// <summary>Relación usuario-grupo.</summary>
+    public DbSet<YarqtbUsuarioGrupo> UsuarioGrupos => Set<YarqtbUsuarioGrupo>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(YarquaDbContext).Assembly);
+        // Identity configures its entities first
         base.OnModelCreating(modelBuilder);
+
+        // Apply our EF configurations (picks up ApplicationUserConfiguration, etc.)
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(YarquaDbContext).Assembly);
+
+        // Rename remaining Identity tables to Yarqtb prefix
+        modelBuilder.Entity<IdentityRole>().ToTable("YarqtbRol");
+        modelBuilder.Entity<IdentityUserRole<string>>().ToTable("YarqtbUsuarioRol");
+        modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("YarqtbUsuarioClaim");
+        modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("YarqtbUsuarioLogin");
+        modelBuilder.Entity<IdentityUserToken<string>>().ToTable("YarqtbUsuarioToken");
+        modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("YarqtbRolClaim");
     }
 }

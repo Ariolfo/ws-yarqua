@@ -3,20 +3,26 @@ namespace Yarqua.Application.DTOs;
 /// <summary>Usuario expuesto en autenticación.</summary>
 public class UserDto
 {
-    /// <summary>Identificador lógico u-...</summary>
+    /// <summary>Identificador (GUID de Identity).</summary>
     public string Id { get; set; } = string.Empty;
 
-    /// <summary>Nombre.</summary>
+    /// <summary>Nombre para mostrar.</summary>
     public string Name { get; set; } = string.Empty;
 
-    /// <summary>País canónico.</summary>
-    public string Country { get; set; } = string.Empty;
+    /// <summary>Correo electrónico.</summary>
+    public string Email { get; set; } = string.Empty;
 
-    /// <summary>Departamento canónico.</summary>
-    public string Department { get; set; } = string.Empty;
+    /// <summary>Roles asignados.</summary>
+    public string[] Roles { get; set; } = [];
 
-    /// <summary>Ciudad canónica.</summary>
-    public string City { get; set; } = string.Empty;
+    /// <summary>País canónico (al registrar).</summary>
+    public string? Country { get; set; }
+
+    /// <summary>Departamento canónico (al registrar).</summary>
+    public string? Department { get; set; }
+
+    /// <summary>Ciudad canónica (al registrar).</summary>
+    public string? City { get; set; }
 }
 
 /// <summary>Respuesta de registro / login.</summary>

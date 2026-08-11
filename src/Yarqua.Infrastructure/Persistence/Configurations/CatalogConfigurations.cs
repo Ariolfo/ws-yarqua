@@ -10,7 +10,7 @@ public class YarqtbRedConfiguration : IEntityTypeConfiguration<YarqtbRed>
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<YarqtbRed> builder)
     {
-        builder.ToTable("YarqtbRed");
+        builder.ToTable("YarqtbRed", t => t.ExcludeFromMigrations());
         builder.HasKey(x => x.RedId);
         builder.Property(x => x.RedId).HasColumnName("Red_Id").ValueGeneratedOnAdd();
         builder.Property(x => x.RedNombre).HasColumnName("Red_Nombre").HasMaxLength(50).IsRequired();
@@ -26,7 +26,7 @@ public class YarqtbCultivoConfiguration : IEntityTypeConfiguration<YarqtbCultivo
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<YarqtbCultivo> builder)
     {
-        builder.ToTable("YarqtbCultivo");
+        builder.ToTable("YarqtbCultivo", t => t.ExcludeFromMigrations());
         builder.HasKey(x => x.CultId);
         builder.Property(x => x.CultId).HasColumnName("Cult_Id").ValueGeneratedOnAdd();
         builder.Property(x => x.CultNombre).HasColumnName("Cult_Nombre").HasMaxLength(100).IsRequired();
@@ -46,7 +46,7 @@ public class YarqtbSensorConfiguration : IEntityTypeConfiguration<YarqtbSensor>
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<YarqtbSensor> builder)
     {
-        builder.ToTable("YarqtbSensor");
+        builder.ToTable("YarqtbSensor", t => t.ExcludeFromMigrations());
         builder.HasKey(x => x.SensId);
         builder.Property(x => x.SensId).HasColumnName("Sens_Id").ValueGeneratedOnAdd();
         builder.Property(x => x.SensNombre).HasColumnName("Sens_Nombre").HasMaxLength(50).IsRequired();
@@ -73,7 +73,7 @@ public class YarqtbMetodoCCConfiguration : IEntityTypeConfiguration<YarqtbMetodo
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<YarqtbMetodoCC> builder)
     {
-        builder.ToTable("YarqtbMetodoCC");
+        builder.ToTable("YarqtbMetodoCC", t => t.ExcludeFromMigrations());
         builder.HasKey(x => x.MetoId);
         builder.Property(x => x.MetoId).HasColumnName("Meto_Id").ValueGeneratedOnAdd();
         builder.Property(x => x.MetoNombre).HasColumnName("Meto_Nombre").HasMaxLength(120).IsRequired();

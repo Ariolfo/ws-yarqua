@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Yarqua.Application.Common.Interfaces;
 using Yarqua.Application.Common.Models;
@@ -10,6 +11,7 @@ namespace Yarqua.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/crops")]
+[Authorize]
 public class CropsController : ControllerBase
 {
     private readonly ICropCatalogService _crops;
@@ -100,6 +102,7 @@ public class CropsController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/v1/catalog/sensors")]
+[Authorize]
 public class CatalogSensorsController : ControllerBase
 {
     private readonly ISensorCatalogService _sensors;
@@ -203,6 +206,7 @@ public class CatalogSensorsController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/v1/catalog/metodos-cc")]
+[Authorize]
 public class MetodosCCController : ControllerBase
 {
     private readonly IMetodoCCCatalogService _metodos;

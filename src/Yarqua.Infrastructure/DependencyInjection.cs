@@ -1,12 +1,14 @@
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Yarqua.Application.Common.Interfaces;
+using Yarqua.Infrastructure.Identity;
 using Yarqua.Infrastructure.Options;
 using Yarqua.Infrastructure.Persistence;
 using Yarqua.Infrastructure.Persistence.Repositories;
@@ -20,11 +22,8 @@ namespace Yarqua.Infrastructure;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Agrega EF Core, JWT, HttpClient Visualiti y servicios de infraestructura.
+    /// Agrega EF Core, Identity, JWT, HttpClient Visualiti y servicios de infraestructura.
     /// </summary>
-    /// <param name="services">Contenedor DI.</param>
-    /// <param name="configuration">Configuración.</param>
-    /// <returns>El mismo contenedor.</returns>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
@@ -36,38 +35,24 @@ public static class DependencyInjection
         services.AddDbContext<YarquaDbContext>(options =>
             options.UseSqlServer(connectionString));
 
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-        services.AddScoped<IEventoUsuarioRepository, EventoUsuarioRepository>();
-        services.AddScoped<IUsuarioDispositivoRepository, UsuarioDispositivoRepository>();
-        services.AddScoped<IGeoRepository, GeoRepository>();
-        services.AddScoped<ISensorCatalogService, SensorCatalogService>();
-        services.AddScoped<ICropCatalogService, CropCatalogService>();
-        services.AddScoped<IMetodoCCCatalogService, MetodoCCCatalogService>();
-
-        services.AddScoped<IJwtTokenService, JwtTokenService>();
-        services.AddScoped<IGeoResolver, GeoResolver>();
-        services.AddSingleton<IVisualitiMoistureCache, VisualitiMoistureCache>();
-
-        var visualiti = configuration.GetSection(VisualitiOptions.SectionName).Get<VisualitiOptions>()
-                        ?? new VisualitiOptions();
-
-        services.AddHttpClient<IVisualitiClient, VisualitiClient>(client =>
+        // ASP.NET Core Identity (sin cookies — API pura con JWT)
+        services.AddIdentityCore<ApplicationUser>(options =>
             {
-                client.Timeout = TimeSpan.FromSeconds(60);
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+                options.User.RequireUniqueEmail = true;
             })
-            .ConfigurePrimaryHttpMessageHandler(() =>
-            {
-                var handler = new HttpClientHandler();
-                if (!visualiti.SslVerify)
-                {
-                    handler.ServerCertificateCustomValidationCallback =
-                        static (HttpRequestMessage _, X509Certificate2? _, X509Chain? _, SslPolicyErrors _) => true;
-                }
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<YarquaDbContext>()
+            .AddDefaultTokenProviders();
 
-                return handler;
-            });
-
+        // JWT como esquema de autenticación principal
         var jwt = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
             string.IsNullOrWhiteSpace(jwt.Secret)
@@ -85,10 +70,44 @@ public static class DependencyInjection
                     IssuerSigningKey = key,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromSeconds(30),
+                    RoleClaimType = System.Security.Claims.ClaimTypes.Role,
                 };
             });
 
         services.AddAuthorization();
+
+        // Repositories and application services
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IEventoUsuarioRepository, EventoUsuarioRepository>();
+        services.AddScoped<IUsuarioDispositivoRepository, UsuarioDispositivoRepository>();
+        services.AddScoped<IGeoRepository, GeoRepository>();
+        services.AddScoped<ISensorCatalogService, SensorCatalogService>();
+        services.AddScoped<ICropCatalogService, CropCatalogService>();
+        services.AddScoped<IMetodoCCCatalogService, MetodoCCCatalogService>();
+
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IGeoResolver, GeoResolver>();
+        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddSingleton<IVisualitiMoistureCache, VisualitiMoistureCache>();
+
+        var visualiti = configuration.GetSection(VisualitiOptions.SectionName).Get<VisualitiOptions>()
+                        ?? new VisualitiOptions();
+
+        services.AddHttpClient<IVisualitiClient, VisualitiClient>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(60);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                var handler = new HttpClientHandler();
+                if (!visualiti.SslVerify)
+                {
+                    handler.ServerCertificateCustomValidationCallback =
+                        static (HttpRequestMessage _, X509Certificate2? _, X509Chain? _, SslPolicyErrors _) => true;
+                }
+                return handler;
+            });
+
         return services;
     }
 }

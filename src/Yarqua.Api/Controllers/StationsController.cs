@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Yarqua.Application.Common.Models;
 using Yarqua.Application.DTOs;
@@ -12,6 +13,7 @@ namespace Yarqua.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/stations")]
+[Authorize]
 public class StationsController : ControllerBase
 {
     private readonly IMediator _mediator;

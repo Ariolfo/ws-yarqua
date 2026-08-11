@@ -1,9 +1,11 @@
 using System.Text.Json.Serialization;
 using DotNetEnv;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Yarqua.Api.Middleware;
 using Yarqua.Application;
 using Yarqua.Infrastructure;
+using Yarqua.Infrastructure.Identity;
 
 // Carga opcional de ws-yarqua/.env (si existe) antes del host.
 TryLoadDotEnv();
@@ -38,6 +40,29 @@ try
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new() { Title = "Yarqua API", Version = "v1" });
+        c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+            Scheme = "Bearer",
+            BearerFormat = "JWT",
+            In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+            Description = "Ingrese el token JWT. Ejemplo: Bearer {token}",
+        });
+        c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+        {
+            {
+                new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                    {
+                        Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                },
+                Array.Empty<string>()
+            },
+        });
     });
 
     var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
@@ -51,6 +76,17 @@ try
     });
 
     var app = builder.Build();
+
+    // Seed Identity roles on startup
+    using (var scope = app.Services.CreateScope())
+    {
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        foreach (var role in AppRoles.All)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+                await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
 
     app.UseSerilogRequestLogging(options =>
     {

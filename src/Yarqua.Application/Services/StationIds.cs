@@ -1,3 +1,7 @@
+using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
+
 namespace Yarqua.Application.Services;
 
 /// <summary>
@@ -70,5 +74,29 @@ public static class StationIds
     {
         var finca = (nombreFinca ?? string.Empty).Trim();
         return string.IsNullOrEmpty(finca) ? serial : finca;
+    }
+}
+
+/// <summary>
+/// Generación de slugs estilo python-slugify.
+/// </summary>
+internal static class SlugHelper
+{
+    internal static string Slugify(string text, string separator = "-")
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return string.Empty;
+
+        var normalized = text.Trim().Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder();
+        foreach (var c in normalized)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.NonSpacingMark)
+                continue;
+            sb.Append(char.IsLetterOrDigit(c) ? char.ToLowerInvariant(c) : separator);
+        }
+
+        var slug = Regex.Replace(sb.ToString(), $"{Regex.Escape(separator)}+", separator);
+        return slug.Trim(separator.ToCharArray());
     }
 }
