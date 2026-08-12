@@ -35,6 +35,29 @@ public sealed class CreateCropRequest
     public double IrrigationDecision { get; set; }
 }
 
+/// <summary>DTO de método para capacidad de campo.</summary>
+public sealed class MetodoCCDto
+{
+    /// <summary>Id.</summary>
+    public int Id { get; set; }
+
+    /// <summary>Nombre.</summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>Descripción.</summary>
+    public string? Description { get; set; }
+}
+
+/// <summary>Request para crear/actualizar método CC.</summary>
+public sealed class CreateMetodoCCRequest
+{
+    /// <summary>Nombre.</summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>Descripción.</summary>
+    public string? Description { get; set; }
+}
+
 /// <summary>DTO de red con país.</summary>
 public sealed class NetworkDto
 {

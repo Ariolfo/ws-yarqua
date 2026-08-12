@@ -66,3 +66,21 @@ public class YarqtbSensorConfiguration : IEntityTypeConfiguration<YarqtbSensor>
         builder.HasOne(x => x.Cultivo).WithMany(c => c.Sensores).HasForeignKey(x => x.CultId);
     }
 }
+
+/// <summary>Configuración EF de YarqtbMetodoCC.</summary>
+public class YarqtbMetodoCCConfiguration : IEntityTypeConfiguration<YarqtbMetodoCC>
+{
+    /// <inheritdoc />
+    public void Configure(EntityTypeBuilder<YarqtbMetodoCC> builder)
+    {
+        builder.ToTable("YarqtbMetodoCC", t => t.ExcludeFromMigrations());
+        builder.HasKey(x => x.MetoId);
+        builder.Property(x => x.MetoId).HasColumnName("Meto_Id").ValueGeneratedOnAdd();
+        builder.Property(x => x.MetoNombre).HasColumnName("Meto_Nombre").HasMaxLength(120).IsRequired();
+        builder.Property(x => x.MetoDescripcion).HasColumnName("Meto_Descripcion").HasMaxLength(500);
+        builder.Property(x => x.MetoActivo).HasColumnName("Meto_Activo");
+        builder.Property(x => x.MetoFechaCreacion).HasColumnName("Meto_FechaCreacion");
+        builder.Property(x => x.MetoFechaActualizacion).HasColumnName("Meto_FechaActualizacion");
+        builder.HasIndex(x => x.MetoNombre).IsUnique();
+    }
+}
