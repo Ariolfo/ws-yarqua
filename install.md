@@ -1,12 +1,16 @@
 dotnet tool install --global dotnet-ef
 
-dotnet ef migrations add IdentityMigration \
-    --project src/Yarqua.Infrastructure \
-    --startup-project src/Yarqua.Api \
-    --output-dir Persistence/Migrations
+# Scripts SQL base (geo + catálogo). En BD ya existente con Usuario BIGINT
+# ejecutar también: database/init/012_prepare_identity.sql
+bash database/install.sh
 
-bash database/install.sh    
-
-    dotnet ef database update \
+# Aplicar ASP.NET Identity (tablas YarqtbUsuario / YarqtbRol / …)
+export DOTNET_ROOT="$HOME/.dotnet"
+export PATH="$HOME/.dotnet:$HOME/.dotnet/tools:$PATH"
+# Requiere ConnectionStrings__DefaultConnection (p. ej. desde .env)
+dotnet ef database update \
     --project src/Yarqua.Infrastructure \
     --startup-project src/Yarqua.Api
+
+# Opcional: definir Seed__AdminEmail / Seed__AdminPassword en .env
+# para crear el admin al iniciar la API.
