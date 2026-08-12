@@ -81,6 +81,7 @@ public static class DependencyInjection
         services.AddScoped<IGeoRepository, GeoRepository>();
         services.AddScoped<ISensorCatalogService, SensorCatalogService>();
         services.AddScoped<ICropCatalogService, CropCatalogService>();
+        services.AddScoped<IIrrigationCalculationService, IrrigationCalculationService>();
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IGeoResolver, GeoResolver>();

@@ -34,6 +34,12 @@ public class YarquaDbContext : IdentityDbContext<ApplicationUser, IdentityRole, 
     /// <summary>Sensores.</summary>
     public DbSet<YarqtbSensor> Sensores => Set<YarqtbSensor>();
 
+    /// <summary>Métodos para capacidad de campo.</summary>
+    public DbSet<YarqtbMetodoCC> MetodosCC => Set<YarqtbMetodoCC>();
+
+    /// <summary>Registros de la calculadora de riego.</summary>
+    public DbSet<YarqtbCalculoRiego> CalculosRiego => Set<YarqtbCalculoRiego>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
