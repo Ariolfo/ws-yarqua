@@ -7,12 +7,12 @@
   - Honduras: departamentos (admin1) y municipios (admin2) — 18 deptos, 298 municipios (coincidente con INE HN).
   - País: códigos numéricos ISO 3166-1: ECUADOR=218, HONDURAS=340.
   - Colombia permanece en 004_seed_colombia_geo_full.sql (DANE).
-  Autor: AGROSAVIA · Yarqua | 2026-08-07
+  Autor: AGROSAVIA · Hidrix | 2026-08-07
 */
-USE [dbYarqua];
+USE [dbHidrix];
 GO
 
-MERGE dbo.YarqtbPais AS t
+MERGE dbo.HidrtbPais AS t
 USING (VALUES
     (218, N'ECUADOR', 2),
     (340, N'HONDURAS', 2)
@@ -23,24 +23,24 @@ WHEN NOT MATCHED THEN INSERT (Pais_Id, Pais_Nombre, Pais_Estado) VALUES (s.Pais_
 GO
 
 
-IF OBJECT_ID(N'dbo.YarqtbUsuario', N'U') IS NOT NULL
-    DELETE FROM dbo.YarqtbUsuario
+IF OBJECT_ID(N'dbo.HidrtbUsuario', N'U') IS NOT NULL
+    DELETE FROM dbo.HidrtbUsuario
     WHERE Ciu_Id IN (
         SELECT c.Ciu_Id
-        FROM dbo.YarqtbCiudad c
-        INNER JOIN dbo.YarqtbDepartamento d ON d.Depo_Id = c.Depo_Id
+        FROM dbo.HidrtbCiudad c
+        INNER JOIN dbo.HidrtbDepartamento d ON d.Depo_Id = c.Depo_Id
         WHERE d.Pais_Id IN (218, 340)
     );
 
 DELETE c
-FROM dbo.YarqtbCiudad c
-INNER JOIN dbo.YarqtbDepartamento d ON d.Depo_Id = c.Depo_Id
+FROM dbo.HidrtbCiudad c
+INNER JOIN dbo.HidrtbDepartamento d ON d.Depo_Id = c.Depo_Id
 WHERE d.Pais_Id IN (218, 340);
 
-DELETE FROM dbo.YarqtbDepartamento WHERE Pais_Id IN (218, 340);
+DELETE FROM dbo.HidrtbDepartamento WHERE Pais_Id IN (218, 340);
 GO
 
-MERGE dbo.YarqtbDepartamento AS t
+MERGE dbo.HidrtbDepartamento AS t
 USING (VALUES
     (2101, 218, N'01', N'GALÁPAGOS'),
     (2102, 218, N'02', N'AZUAY'),
@@ -72,7 +72,7 @@ WHEN MATCHED THEN UPDATE SET Pais_Id = s.Pais_Id, Depo_Code = s.Depo_Code, Depo_
 WHEN NOT MATCHED THEN INSERT (Depo_Id, Pais_Id, Depo_Code, Depo_Nombre) VALUES (s.Depo_Id, s.Pais_Id, s.Depo_Code, s.Depo_Nombre);
 GO
 
-MERGE dbo.YarqtbDepartamento AS t
+MERGE dbo.HidrtbDepartamento AS t
 USING (VALUES
     (3401, 340, N'01', N'ATLÁNTIDA'),
     (3402, 340, N'02', N'CHOLUTECA'),
@@ -99,7 +99,7 @@ WHEN NOT MATCHED THEN INSERT (Depo_Id, Pais_Id, Depo_Code, Depo_Nombre) VALUES (
 GO
 
 -- EC ciudades bloque 1
-MERGE dbo.YarqtbCiudad AS t
+MERGE dbo.HidrtbCiudad AS t
 USING (VALUES
     (2012001, N'SAN CRISTÓBAL', 2101, N'2001'),
     (2012002, N'ISABELA', 2101, N'2002'),
@@ -329,7 +329,7 @@ WHEN NOT MATCHED THEN INSERT (Ciu_Id, Ciu_Nombre, Depo_Id, Ciu_Cod) VALUES (s.Ci
 GO
 
 -- HN ciudades bloque 1
-MERGE dbo.YarqtbCiudad AS t
+MERGE dbo.HidrtbCiudad AS t
 USING (VALUES
     (3010101, N'LA CEIBA', 3401, N'0101'),
     (3010102, N'EL PORVENIR', 3401, N'0102'),
@@ -588,7 +588,7 @@ WHEN NOT MATCHED THEN INSERT (Ciu_Id, Ciu_Nombre, Depo_Id, Ciu_Cod) VALUES (s.Ci
 GO
 
 -- HN ciudades bloque 2
-MERGE dbo.YarqtbCiudad AS t
+MERGE dbo.HidrtbCiudad AS t
 USING (VALUES
     (3161601, N'SANTA BÁRBARA', 3416, N'1601'),
     (3161602, N'ARADA', 3416, N'1602'),

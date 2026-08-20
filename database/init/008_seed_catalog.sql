@@ -1,12 +1,12 @@
 /*
   Semilla: redes–país, cultivos (calculadora) y sensores (API Visualiti + IDI-DPA-010).
-  Autor: AGROSAVIA · Yarqua | 2026-08-07
+  Autor: AGROSAVIA · Hidrix | 2026-08-07
 */
-USE [dbYarqua];
+USE [dbHidrix];
 GO
 
 /* Redes ↔ país */
-MERGE dbo.YarqtbRed AS t
+MERGE dbo.HidrtbRed AS t
 USING (VALUES
     (N'RED ASORUT', 170),
     (N'RED ECUADOR', 218),
@@ -18,7 +18,7 @@ WHEN NOT MATCHED THEN INSERT (Red_Nombre, Pais_Id) VALUES (s.Red_Nombre, s.Pais_
 GO
 
 /* Cultivos de la calculadora */
-MERGE dbo.YarqtbCultivo AS t
+MERGE dbo.HidrtbCultivo AS t
 USING (VALUES
     (N'Aguacate', CAST(39 AS DECIMAL(8,2)), CAST(31.20 AS DECIMAL(8,2)), CAST(24.96 AS DECIMAL(8,2))),
     (N'Cacao',    CAST(34 AS DECIMAL(8,2)), CAST(27.20 AS DECIMAL(8,2)), CAST(21.76 AS DECIMAL(8,2))),
@@ -68,7 +68,7 @@ GO
     (N'M332', N'RED HONDURA', N'Cacao',  NULL, CAST(13.9996600 AS DECIMAL(10,7)), CAST(-86.9875500 AS DECIMAL(10,7)))
     ) AS v (Sens_Nombre, Red_Nombre, Cult_Nombre, Sens_Finca, Sens_Latitud, Sens_Longitud)
 )
-MERGE dbo.YarqtbSensor AS t
+MERGE dbo.HidrtbSensor AS t
 USING (
     SELECT
         s.Sens_Nombre,
@@ -78,8 +78,8 @@ USING (
         s.Sens_Longitud,
         s.Sens_Finca
     FROM Src s
-    INNER JOIN dbo.YarqtbRed r ON r.Red_Nombre = s.Red_Nombre
-    LEFT JOIN dbo.YarqtbCultivo c ON c.Cult_Nombre = s.Cult_Nombre
+    INNER JOIN dbo.HidrtbRed r ON r.Red_Nombre = s.Red_Nombre
+    LEFT JOIN dbo.HidrtbCultivo c ON c.Cult_Nombre = s.Cult_Nombre
 ) AS x
 ON t.Sens_Nombre = x.Sens_Nombre
 WHEN MATCHED THEN UPDATE SET

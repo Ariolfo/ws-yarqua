@@ -1,34 +1,34 @@
 /*
   Catálogo geográfico completo Colombia (33 deptos / 1122 ciudades).
   Conserva Ecuador y Honduras del seed base.
-  Autor: AGROSAVIA · Yarqua | 2026-07-22
+  Autor: AGROSAVIA · Hidrix | 2026-07-22
 */
-USE [dbYarqua];
+USE [dbHidrix];
 GO
 
 -- Reemplazar solo Colombia para alinear IDs/códigos con el catálogo maestro
--- YarqtbUsuario es administrado por EF; solo limpiar si ya existe la tabla.
-IF OBJECT_ID(N'dbo.YarqtbUsuario', N'U') IS NOT NULL
-    DELETE FROM dbo.YarqtbUsuario
+-- HidrtbUsuario es administrado por EF; solo limpiar si ya existe la tabla.
+IF OBJECT_ID(N'dbo.HidrtbUsuario', N'U') IS NOT NULL
+    DELETE FROM dbo.HidrtbUsuario
     WHERE Ciu_Id IN (
         SELECT c.Ciu_Id
-        FROM dbo.YarqtbCiudad c
-        INNER JOIN dbo.YarqtbDepartamento d ON d.Depo_Id = c.Depo_Id
+        FROM dbo.HidrtbCiudad c
+        INNER JOIN dbo.HidrtbDepartamento d ON d.Depo_Id = c.Depo_Id
         WHERE d.Pais_Id = 170
     );
 
-DELETE c FROM dbo.YarqtbCiudad c INNER JOIN dbo.YarqtbDepartamento d ON d.Depo_Id = c.Depo_Id WHERE d.Pais_Id = 170;
-DELETE FROM dbo.YarqtbDepartamento WHERE Pais_Id = 170;
+DELETE c FROM dbo.HidrtbCiudad c INNER JOIN dbo.HidrtbDepartamento d ON d.Depo_Id = c.Depo_Id WHERE d.Pais_Id = 170;
+DELETE FROM dbo.HidrtbDepartamento WHERE Pais_Id = 170;
 GO
 
-MERGE dbo.YarqtbPais AS t
+MERGE dbo.HidrtbPais AS t
 USING (VALUES (170, N'COLOMBIA', 2)) AS s (Pais_Id, Pais_Nombre, Pais_Estado)
 ON t.Pais_Id = s.Pais_Id
 WHEN MATCHED THEN UPDATE SET Pais_Nombre = s.Pais_Nombre, Pais_Estado = s.Pais_Estado
 WHEN NOT MATCHED THEN INSERT (Pais_Id, Pais_Nombre, Pais_Estado) VALUES (s.Pais_Id, s.Pais_Nombre, s.Pais_Estado);
 GO
 
-MERGE dbo.YarqtbDepartamento AS t
+MERGE dbo.HidrtbDepartamento AS t
 USING (VALUES
     (1, 170, N'05', N'ANTIOQUIA'),
     (2, 170, N'08', N'ATLÁNTICO'),
@@ -69,7 +69,7 @@ WHEN MATCHED THEN UPDATE SET Pais_Id = s.Pais_Id, Depo_Code = s.Depo_Code, Depo_
 WHEN NOT MATCHED THEN INSERT (Depo_Id, Pais_Id, Depo_Code, Depo_Nombre) VALUES (s.Depo_Id, s.Pais_Id, s.Depo_Code, s.Depo_Nombre);
 GO
 
-MERGE dbo.YarqtbCiudad AS t
+MERGE dbo.HidrtbCiudad AS t
 USING (VALUES
     (1, N'MEDELLÍN', 1, N'05001'),
     (2, N'ABEJORRAL', 1, N'05002'),
@@ -277,7 +277,7 @@ WHEN MATCHED THEN UPDATE SET Ciu_Nombre = s.Ciu_Nombre, Depo_Id = s.Depo_Id, Ciu
 WHEN NOT MATCHED THEN INSERT (Ciu_Id, Ciu_Nombre, Depo_Id, Ciu_Cod) VALUES (s.Ciu_Id, s.Ciu_Nombre, s.Depo_Id, s.Ciu_Cod);
 GO
 
-MERGE dbo.YarqtbCiudad AS t
+MERGE dbo.HidrtbCiudad AS t
 USING (VALUES
     (201, N'BERBEO', 5, N'15090'),
     (202, N'BETÉITIVA', 5, N'15092'),
@@ -485,7 +485,7 @@ WHEN MATCHED THEN UPDATE SET Ciu_Nombre = s.Ciu_Nombre, Depo_Id = s.Depo_Id, Ciu
 WHEN NOT MATCHED THEN INSERT (Ciu_Id, Ciu_Nombre, Depo_Id, Ciu_Cod) VALUES (s.Ciu_Id, s.Ciu_Nombre, s.Depo_Id, s.Ciu_Cod);
 GO
 
-MERGE dbo.YarqtbCiudad AS t
+MERGE dbo.HidrtbCiudad AS t
 USING (VALUES
     (401, N'TORIBÍO', 8, N'19821'),
     (402, N'TOTORÓ', 8, N'19824'),
@@ -693,7 +693,7 @@ WHEN MATCHED THEN UPDATE SET Ciu_Nombre = s.Ciu_Nombre, Depo_Id = s.Depo_Id, Ciu
 WHEN NOT MATCHED THEN INSERT (Ciu_Id, Ciu_Nombre, Depo_Id, Ciu_Cod) VALUES (s.Ciu_Id, s.Ciu_Nombre, s.Depo_Id, s.Ciu_Cod);
 GO
 
-MERGE dbo.YarqtbCiudad AS t
+MERGE dbo.HidrtbCiudad AS t
 USING (VALUES
     (601, N'SAN JOSÉ DEL PALMAR', 12, N'27660'),
     (602, N'SIPÍ', 12, N'27745'),
@@ -901,7 +901,7 @@ WHEN MATCHED THEN UPDATE SET Ciu_Nombre = s.Ciu_Nombre, Depo_Id = s.Depo_Id, Ciu
 WHEN NOT MATCHED THEN INSERT (Ciu_Id, Ciu_Nombre, Depo_Id, Ciu_Cod) VALUES (s.Ciu_Id, s.Ciu_Nombre, s.Depo_Id, s.Ciu_Cod);
 GO
 
-MERGE dbo.YarqtbCiudad AS t
+MERGE dbo.HidrtbCiudad AS t
 USING (VALUES
     (801, N'LA PLAYA', 18, N'54398'),
     (802, N'LOS PATIOS', 18, N'54405'),
@@ -1109,7 +1109,7 @@ WHEN MATCHED THEN UPDATE SET Ciu_Nombre = s.Ciu_Nombre, Depo_Id = s.Depo_Id, Ciu
 WHEN NOT MATCHED THEN INSERT (Ciu_Id, Ciu_Nombre, Depo_Id, Ciu_Cod) VALUES (s.Ciu_Id, s.Ciu_Nombre, s.Depo_Id, s.Ciu_Cod);
 GO
 
-MERGE dbo.YarqtbCiudad AS t
+MERGE dbo.HidrtbCiudad AS t
 USING (VALUES
     (1001, N'SANTA ISABEL', 23, N'73686'),
     (1002, N'SUÁREZ', 23, N'73770'),

@@ -1,50 +1,50 @@
 /*
   Prepara la BD existente para ASP.NET Identity (migración EF IdentityMigration).
-  - Elimina YarqtbUsuario antiguo (BIGINT) incompatible con Identity (NVARCHAR Id).
+  - Elimina HidrtbUsuario antiguo (BIGINT) incompatible con Identity (NVARCHAR Id).
   - Elimina tablas legacy ya no usadas por el código actual.
   Los usuarios previos deben volver a registrarse (no había hash de contraseña).
-  Autor: AGROSAVIA · Yarqua | 2026-08-12
+  Autor: AGROSAVIA · Hidrix | 2026-08-12
 */
-USE [dbYarqua];
+USE [dbHidrix];
 GO
 
 /* ---- Tablas legacy fuera del modelo actual ---- */
-IF OBJECT_ID(N'dbo.YarqtbUsuarioDispositivo', N'U') IS NOT NULL
-    DROP TABLE dbo.YarqtbUsuarioDispositivo;
+IF OBJECT_ID(N'dbo.HidrtbUsuarioDispositivo', N'U') IS NOT NULL
+    DROP TABLE dbo.HidrtbUsuarioDispositivo;
 GO
 
-IF OBJECT_ID(N'dbo.YarqtbDevicePushToken', N'U') IS NOT NULL
-    DROP TABLE dbo.YarqtbDevicePushToken;
+IF OBJECT_ID(N'dbo.HidrtbDevicePushToken', N'U') IS NOT NULL
+    DROP TABLE dbo.HidrtbDevicePushToken;
 GO
 
-IF OBJECT_ID(N'dbo.YarqtbEventoUsuario', N'U') IS NOT NULL
-    DROP TABLE dbo.YarqtbEventoUsuario;
+IF OBJECT_ID(N'dbo.HidrtbEventoUsuario', N'U') IS NOT NULL
+    DROP TABLE dbo.HidrtbEventoUsuario;
 GO
 
-IF OBJECT_ID(N'dbo.YarqtbMetodoCC', N'U') IS NOT NULL
-    DROP TABLE dbo.YarqtbMetodoCC;
+IF OBJECT_ID(N'dbo.HidrtbMetodoCC', N'U') IS NOT NULL
+    DROP TABLE dbo.HidrtbMetodoCC;
 GO
 
 /* ---- Usuario antiguo (solo si aún es BIGINT / sin columnas Identity) ---- */
-IF OBJECT_ID(N'dbo.YarqtbUsuario', N'U') IS NOT NULL
-   AND COL_LENGTH(N'dbo.YarqtbUsuario', N'PasswordHash') IS NULL
+IF OBJECT_ID(N'dbo.HidrtbUsuario', N'U') IS NOT NULL
+   AND COL_LENGTH(N'dbo.HidrtbUsuario', N'PasswordHash') IS NULL
 BEGIN
     DECLARE @sql NVARCHAR(MAX) = N'';
 
-    SELECT @sql = @sql + N'ALTER TABLE dbo.YarqtbUsuario DROP CONSTRAINT ' + QUOTENAME(fk.name) + N';'
+    SELECT @sql = @sql + N'ALTER TABLE dbo.HidrtbUsuario DROP CONSTRAINT ' + QUOTENAME(fk.name) + N';'
     FROM sys.foreign_keys fk
-    WHERE fk.parent_object_id = OBJECT_ID(N'dbo.YarqtbUsuario');
+    WHERE fk.parent_object_id = OBJECT_ID(N'dbo.HidrtbUsuario');
 
     SELECT @sql = @sql + N'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(fk.parent_object_id))
         + N'.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id))
         + N' DROP CONSTRAINT ' + QUOTENAME(fk.name) + N';'
     FROM sys.foreign_keys fk
-    WHERE fk.referenced_object_id = OBJECT_ID(N'dbo.YarqtbUsuario');
+    WHERE fk.referenced_object_id = OBJECT_ID(N'dbo.HidrtbUsuario');
 
     IF LEN(@sql) > 0
         EXEC sp_executesql @sql;
 
-    DROP TABLE dbo.YarqtbUsuario;
+    DROP TABLE dbo.HidrtbUsuario;
 END
 GO
 
