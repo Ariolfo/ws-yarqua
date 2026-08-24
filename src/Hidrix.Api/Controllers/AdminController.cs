@@ -2,6 +2,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Hidrix.Application.Common.Exceptions;
+using Hidrix.Application.Common.Interfaces;
 using Hidrix.Application.Common.Models;
 using Hidrix.Infrastructure.Identity;
 
@@ -16,11 +18,18 @@ namespace Hidrix.Api.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IGeoResolver _geoResolver;
+    private readonly IGeoRepository _geo;
 
     /// <summary>Inicializa el controlador.</summary>
-    public AdminController(UserManager<ApplicationUser> userManager)
+    public AdminController(
+        UserManager<ApplicationUser> userManager,
+        IGeoResolver geoResolver,
+        IGeoRepository geo)
     {
         _userManager = userManager;
+        _geoResolver = geoResolver;
+        _geo = geo;
     }
 
     /// <summary>Lista usuarios con rol Admin.</summary>
@@ -37,6 +46,22 @@ public class AdminController : ControllerBase
         return Ok(ApiResponse<IReadOnlyList<AdminUserDto>>.Ok(data));
     }
 
+    /// <summary>Obtiene un admin por id.</summary>
+    [HttpGet("admins/{userId}")]
+    [ProducesResponseType(typeof(ApiResponse<AdminUserDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<AdminUserDto>>> GetAdmin(
+        string userId,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null || !await _userManager.IsInRoleAsync(user, AppRoles.Admin))
+        {
+            return NotFound(ApiResponse<AdminUserDto>.Fail("Admin no encontrado."));
+        }
+
+        return Ok(ApiResponse<AdminUserDto>.Ok(await ToDtoAsync(user, cancellationToken)));
+    }
+
     /// <summary>Crea un nuevo usuario Admin.</summary>
     [HttpPost("admins")]
     [ProducesResponseType(typeof(ApiResponse<AdminUserDto>), StatusCodes.Status201Created)]
@@ -47,15 +72,33 @@ public class AdminController : ControllerBase
         var email = (request.Email ?? string.Empty).Trim().ToLowerInvariant();
         var name = (request.Name ?? string.Empty).Trim();
         var password = request.Password ?? string.Empty;
+        var country = (request.Country ?? string.Empty).Trim();
+        var department = (request.Department ?? string.Empty).Trim();
+        var city = (request.City ?? string.Empty).Trim();
 
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(password))
         {
             return BadRequest(ApiResponse<AdminUserDto>.Fail("Nombre, correo y contraseña son obligatorios."));
         }
 
+        if (string.IsNullOrWhiteSpace(country) || string.IsNullOrWhiteSpace(department) || string.IsNullOrWhiteSpace(city))
+        {
+            return BadRequest(ApiResponse<AdminUserDto>.Fail("País, departamento y ciudad son obligatorios."));
+        }
+
         if (password.Length < 8)
         {
             return BadRequest(ApiResponse<AdminUserDto>.Fail("La contraseña debe tener al menos 8 caracteres."));
+        }
+
+        ResolvedLocation location;
+        try
+        {
+            location = await _geoResolver.ResolveAsync(country, department, city, cancellationToken);
+        }
+        catch (AppException ex)
+        {
+            return BadRequest(ApiResponse<AdminUserDto>.Fail(ex.Message));
         }
 
         var existing = await _userManager.FindByEmailAsync(email);
@@ -69,6 +112,7 @@ public class AdminController : ControllerBase
             // Promueve usuario existente a Admin y reactiva.
             existing.UsuaActivo = true;
             existing.UsuaFechaActualizacion = DateTime.UtcNow;
+            existing.CiuId = location.CiuId;
             if (!string.IsNullOrWhiteSpace(name))
             {
                 existing.UsuaNombre = name;
@@ -91,7 +135,9 @@ public class AdminController : ControllerBase
             }
 
             await _userManager.AddToRoleAsync(existing, AppRoles.Admin);
-            return StatusCode(StatusCodes.Status201Created, ApiResponse<AdminUserDto>.Ok(ToDto(existing), "Admin creado"));
+            return StatusCode(
+                StatusCodes.Status201Created,
+                ApiResponse<AdminUserDto>.Ok(await ToDtoAsync(existing, cancellationToken), "Admin creado"));
         }
 
         var user = new ApplicationUser
@@ -99,6 +145,7 @@ public class AdminController : ControllerBase
             UserName = email,
             Email = email,
             UsuaNombre = name,
+            CiuId = location.CiuId,
             UsuaActivo = true,
             UsuaFechaRegistro = DateTime.UtcNow,
             UsuaFechaCreacion = DateTime.UtcNow,
@@ -112,7 +159,40 @@ public class AdminController : ControllerBase
         }
 
         await _userManager.AddToRoleAsync(user, AppRoles.Admin);
-        return StatusCode(StatusCodes.Status201Created, ApiResponse<AdminUserDto>.Ok(ToDto(user), "Admin creado"));
+        return StatusCode(
+            StatusCodes.Status201Created,
+            ApiResponse<AdminUserDto>.Ok(await ToDtoAsync(user, cancellationToken), "Admin creado"));
+    }
+
+    /// <summary>Actualiza datos básicos de un admin.</summary>
+    [HttpPut("admins/{userId}")]
+    [ProducesResponseType(typeof(ApiResponse<AdminUserDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<AdminUserDto>>> UpdateAdmin(
+        string userId,
+        [FromBody] UpdateAdminRequest request,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null || !await _userManager.IsInRoleAsync(user, AppRoles.Admin))
+        {
+            return NotFound(ApiResponse<AdminUserDto>.Fail("Admin no encontrado."));
+        }
+
+        var name = (request.Name ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return BadRequest(ApiResponse<AdminUserDto>.Fail("El nombre es obligatorio."));
+        }
+
+        user.UsuaNombre = name;
+        user.UsuaFechaActualizacion = DateTime.UtcNow;
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            return BadRequest(ApiResponse<AdminUserDto>.Fail(string.Join("; ", result.Errors.Select(e => e.Description))));
+        }
+
+        return Ok(ApiResponse<AdminUserDto>.Ok(await ToDtoAsync(user, cancellationToken), "Admin actualizado"));
     }
 
     /// <summary>Activa o inactiva un admin.</summary>
@@ -154,7 +234,7 @@ public class AdminController : ControllerBase
         }
 
         var msg = request.Active ? "Admin activado" : "Admin inactivado";
-        return Ok(ApiResponse<AdminUserDto>.Ok(ToDto(user), msg));
+        return Ok(ApiResponse<AdminUserDto>.Ok(await ToDtoAsync(user, cancellationToken), msg));
     }
 
     /// <summary>Elimina un admin (borra el usuario).</summary>
@@ -200,6 +280,26 @@ public class AdminController : ControllerBase
         Active = u.UsuaActivo,
         RegisteredAt = u.UsuaFechaRegistro,
     };
+
+    private async Task<AdminUserDto> ToDtoAsync(
+        ApplicationUser u,
+        CancellationToken cancellationToken)
+    {
+        var dto = ToDto(u);
+        var location = await _geo.GetUserLocationByUserIdAsync(u.Id, cancellationToken);
+        if (location is null)
+        {
+            return dto;
+        }
+
+        dto.Country = location.CountryName;
+        dto.Department = location.DepartmentName;
+        dto.City = location.CityName;
+        dto.CountryId = location.CountryId;
+        dto.DepartmentId = location.DepartmentId;
+        dto.CityId = location.CityId;
+        return dto;
+    }
 }
 
 /// <summary>DTO de admin para listado/detalle.</summary>
@@ -210,6 +310,12 @@ public sealed class AdminUserDto
     public string Email { get; set; } = string.Empty;
     public bool Active { get; set; }
     public DateTime RegisteredAt { get; set; }
+    public string? Country { get; set; }
+    public string? Department { get; set; }
+    public string? City { get; set; }
+    public int? CountryId { get; set; }
+    public int? DepartmentId { get; set; }
+    public int? CityId { get; set; }
 }
 
 /// <summary>Request para crear admin.</summary>
@@ -218,6 +324,15 @@ public sealed class CreateAdminRequest
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+    public string Country { get; set; } = string.Empty;
+    public string Department { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+}
+
+/// <summary>Request para actualizar admin.</summary>
+public sealed class UpdateAdminRequest
+{
+    public string Name { get; set; } = string.Empty;
 }
 
 /// <summary>Request para activar/inactivar.</summary>

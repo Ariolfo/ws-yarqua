@@ -193,6 +193,18 @@ public sealed class SensorCatalogService : ISensorCatalogService
     }
 
     /// <inheritdoc />
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await _db.Sensores
+            .FirstOrDefaultAsync(s => s.SensId == id && s.SensActivo, cancellationToken)
+            ?? throw new KeyNotFoundException($"No existe el sensor {id}.");
+
+        entity.SensActivo = false;
+        entity.SensFechaActualizacion = DateTime.UtcNow;
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<NetworkDto>> ListNetworksAsync(CancellationToken cancellationToken = default)
     {
         return await _db.Redes.AsNoTracking()

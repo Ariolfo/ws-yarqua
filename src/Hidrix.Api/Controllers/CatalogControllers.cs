@@ -98,6 +98,24 @@ public class CropsController : ControllerBase
             return Conflict(ApiResponse<CropDto>.Fail(ex.Message));
         }
     }
+
+    /// <summary>Inactiva un cultivo.</summary>
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<object>>> Delete(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _crops.DeleteAsync(id, cancellationToken);
+            return Ok(ApiResponse<object>.Ok(new { ok = true }, "Cultivo eliminado"));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ApiResponse<object>.Fail(ex.Message));
+        }
+    }
 }
 
 /// <summary>
@@ -200,6 +218,23 @@ public class CatalogSensorsController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return Conflict(ApiResponse<CatalogSensorDto>.Fail(ex.Message));
+        }
+    }
+
+    /// <summary>Inactiva un sensor del catálogo.</summary>
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<object>>> Delete(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _sensors.DeleteAsync(id, cancellationToken);
+            return Ok(ApiResponse<object>.Ok(new { ok = true }, "Sensor eliminado"));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ApiResponse<object>.Fail(ex.Message));
         }
     }
 }

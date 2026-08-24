@@ -37,4 +37,9 @@ public interface IGeoRepository
     Task<IReadOnlyList<HidrtbCiudad>> ListCiudadesByDepoIdAsync(
         int depoId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>Ubicación del usuario según su ciudad registrada.</summary>
+    Task<UserLocationDto?> GetUserLocationByUserIdAsync(
+        string userId,
+        CancellationToken cancellationToken = default);
 }

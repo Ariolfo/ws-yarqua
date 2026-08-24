@@ -106,6 +106,18 @@ public sealed class CropCatalogService : ICropCatalogService
     }
 
     /// <inheritdoc />
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await _db.Cultivos
+            .FirstOrDefaultAsync(c => c.CultId == id && c.CultActivo, cancellationToken)
+            ?? throw new KeyNotFoundException($"No existe el cultivo {id}.");
+
+        entity.CultActivo = false;
+        entity.CultFechaActualizacion = DateTime.UtcNow;
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<CropMoistureProfile> ResolveAsync(
         string? cultivoOrText,
         CancellationToken cancellationToken = default)

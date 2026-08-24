@@ -8,6 +8,12 @@ public class ResolvedLocation
     /// <summary>Id de ciudad (única referencia geo del usuario).</summary>
     public int CiuId { get; set; }
 
+    /// <summary>Id del país.</summary>
+    public int PaisId { get; set; }
+
+    /// <summary>Id del departamento.</summary>
+    public int DepoId { get; set; }
+
     /// <summary>Código de país (Pais_Id como texto, informativo).</summary>
     public string CodigoPais { get; set; } = string.Empty;
 

@@ -29,6 +29,9 @@ public interface ISensorCatalogService
     /// <summary>Actualiza un sensor del catálogo.</summary>
     Task<CatalogSensorDto> UpdateAsync(int id, CreateCatalogSensorRequest request, CancellationToken cancellationToken = default);
 
+    /// <summary>Inactiva un sensor del catálogo (borrado lógico).</summary>
+    Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+
     /// <summary>Lista redes con país.</summary>
     Task<IReadOnlyList<NetworkDto>> ListNetworksAsync(CancellationToken cancellationToken = default);
 }
@@ -49,6 +52,9 @@ public interface ICropCatalogService
 
     /// <summary>Actualiza un cultivo.</summary>
     Task<CropDto> UpdateAsync(int id, CreateCropRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>Inactiva un cultivo (borrado lógico).</summary>
+    Task DeleteAsync(int id, CancellationToken cancellationToken = default);
 
     /// <summary>Resuelve perfil por nombre/texto (fallback Cacao).</summary>
     Task<CropMoistureProfile> ResolveAsync(string? cultivoOrText, CancellationToken cancellationToken = default);

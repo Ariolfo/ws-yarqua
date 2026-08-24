@@ -22,8 +22,8 @@ public static class MoisturePercentConverter
 }
 
 /// <summary>
-/// Interpretación de humedad según capacidad de campo (CC) del cultivo.
-/// Estados: excess, attention_high, irrigate, attention_low, deficit.
+/// Interpretación de humedad según umbrales del cultivo (3 zonas).
+/// Estados: normal, drain, irrigate_deficit, no_data.
 /// </summary>
 public static class MoistureStatusInterpreter
 {
@@ -32,7 +32,7 @@ public static class MoistureStatusInterpreter
     /// </summary>
     /// <param name="value">Porcentaje o null.</param>
     /// <param name="cultivo">Cultivo del sensor (para resolver CC).</param>
-    /// <returns>Status y mensaje de alerta (sin prefijo «ALERTA:»).</returns>
+    /// <returns>Status y mensaje de alerta.</returns>
     public static (string Status, string? AlertMessage) Interpret(
         double? value,
         string? cultivo = null)
@@ -56,31 +56,19 @@ public static class MoistureStatusInterpreter
         double value,
         CropMoistureProfile profile)
     {
-        // Exceso: por encima de la capacidad de campo.
-        if (value > profile.FieldCapacity)
+        // Normal: entre decisión de riego (64 % CC) y límite máximo (80 % CC).
+        if (value >= profile.IrrigationDecision && value <= profile.MaxIrrigationLimit)
         {
-            return ("excess", "EXCESO");
+            return ("normal", "Normal, No regar");
         }
 
-        // Atención (arriba de CC): 80 % CC ≤ humedad ≤ CC.
-        if (value >= profile.MaxIrrigationLimit)
+        // Arriba del límite máximo (80 % CC): drenar / saturación.
+        if (value > profile.MaxIrrigationLimit)
         {
-            return ("attention_high", "ATENCIÓN: HUMEDAD ARRIBA DE CC");
+            return ("drain", "Alerta Drenar - saturación");
         }
 
-        // Regar: 64 % CC ≤ humedad &lt; 80 % CC.
-        if (value >= profile.IrrigationDecision)
-        {
-            return ("irrigate", "REGAR");
-        }
-
-        // Atención (abajo de CC): 10 % ≤ humedad &lt; 64 % CC.
-        if (value >= CropMoistureProfiles.SoilFloor)
-        {
-            return ("attention_low", "ATENCIÓN: HUMEDAD ABAJO DE CC");
-        }
-
-        // Déficit: por debajo del 10 % de humedad de suelo.
-        return ("deficit", "DÉFICIT");
+        // Debajo de decisión de riego: regar por déficit.
+        return ("irrigate_deficit", "Alerta REGAR por déficit");
     }
 }

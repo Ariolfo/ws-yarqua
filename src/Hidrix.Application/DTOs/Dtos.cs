@@ -23,6 +23,37 @@ public class UserDto
 
     /// <summary>Ciudad canónica (al registrar).</summary>
     public string? City { get; set; }
+
+    /// <summary>Id del país (catálogo geo).</summary>
+    public int? CountryId { get; set; }
+
+    /// <summary>Id del departamento (catálogo geo).</summary>
+    public int? DepartmentId { get; set; }
+
+    /// <summary>Id de la ciudad (catálogo geo).</summary>
+    public int? CityId { get; set; }
+}
+
+/// <summary>Ubicación geográfica del usuario autenticado (ids del catálogo).</summary>
+public class UserLocationDto
+{
+    /// <summary>Id del país.</summary>
+    public int? CountryId { get; set; }
+
+    /// <summary>Id del departamento.</summary>
+    public int? DepartmentId { get; set; }
+
+    /// <summary>Id de la ciudad.</summary>
+    public int? CityId { get; set; }
+
+    /// <summary>Nombre del país.</summary>
+    public string? CountryName { get; set; }
+
+    /// <summary>Nombre del departamento.</summary>
+    public string? DepartmentName { get; set; }
+
+    /// <summary>Nombre de la ciudad.</summary>
+    public string? CityName { get; set; }
 }
 
 /// <summary>Respuesta de registro / login.</summary>
@@ -121,7 +152,7 @@ public class SensorDto
     /// <summary>Ubicación textual.</summary>
     public string Location { get; set; } = string.Empty;
 
-    /// <summary>Estado: excess, attention_high, irrigate, attention_low, deficit, no_data.</summary>
+    /// <summary>Estado: normal, drain, irrigate_deficit, no_data.</summary>
     public string Status { get; set; } = "no_data";
 
     /// <summary>Última lectura.</summary>

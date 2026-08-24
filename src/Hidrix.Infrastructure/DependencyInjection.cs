@@ -82,6 +82,7 @@ public static class DependencyInjection
         services.AddScoped<ISensorCatalogService, SensorCatalogService>();
         services.AddScoped<ICropCatalogService, CropCatalogService>();
         services.AddScoped<IIrrigationCalculationService, IrrigationCalculationService>();
+        services.AddScoped<IIrrigationEventNoteService, IrrigationEventNoteService>();
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IGeoResolver, GeoResolver>();

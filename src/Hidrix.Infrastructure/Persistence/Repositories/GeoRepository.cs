@@ -107,4 +107,27 @@ public sealed class GeoRepository : IGeoRepository
             .Where(c => c.DepoId == depoId)
             .ToListAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<UserLocationDto?> GetUserLocationByUserIdAsync(
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await (
+            from u in _db.Users.AsNoTracking()
+            join c in _db.Ciudades.AsNoTracking() on u.CiuId equals c.CiuId
+            join d in _db.Departamentos.AsNoTracking() on c.DepoId equals d.DepoId
+            join p in _db.Paises.AsNoTracking() on d.PaisId equals p.PaisId
+            where u.Id == userId
+            select new UserLocationDto
+            {
+                CountryId = p.PaisId,
+                DepartmentId = d.DepoId,
+                CityId = c.CiuId,
+                CountryName = p.PaisNombre,
+                DepartmentName = d.DepoNombre,
+                CityName = c.CiuNombre,
+            }
+        ).FirstOrDefaultAsync(cancellationToken);
+    }
 }

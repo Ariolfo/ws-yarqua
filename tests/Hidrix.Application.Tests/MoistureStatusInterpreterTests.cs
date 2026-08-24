@@ -4,7 +4,7 @@ using Hidrix.Application.Services;
 namespace Hidrix.Application.Tests;
 
 /// <summary>
-/// Pruebas de interpretación de estado por CC del cultivo.
+/// Pruebas de interpretación de estado por CC del cultivo (3 zonas).
 /// </summary>
 public class MoistureStatusInterpreterTests
 {
@@ -17,36 +17,54 @@ public class MoistureStatusInterpreterTests
     }
 
     [Theory]
-    [InlineData(48.0, "excess")]          // > CC cacao 34 %
-    [InlineData(34.0, "attention_high")]  // exactamente CC
-    [InlineData(30.0, "attention_high")]  // 80 % CC–CC
-    [InlineData(27.2, "attention_high")]  // límite 80 % CC
-    [InlineData(25.0, "irrigate")]        // 64 % CC–80 % CC
-    [InlineData(21.76, "irrigate")]
-    [InlineData(15.0, "attention_low")]   // 10 %–64 % CC
-    [InlineData(10.0, "attention_low")]
-    [InlineData(5.0, "deficit")]          // < 10 %
-    public void Interpret_Cacao_UsesFieldCapacityBands(double value, string expected)
+    [InlineData(21.76, "normal")]
+    [InlineData(25.0, "normal")]
+    [InlineData(27.2, "normal")]
+    [InlineData(27.21, "drain")]
+    [InlineData(34.0, "drain")]
+    [InlineData(48.0, "drain")]
+    [InlineData(21.75, "irrigate_deficit")]
+    [InlineData(15.0, "irrigate_deficit")]
+    [InlineData(5.0, "irrigate_deficit")]
+    public void Interpret_Cacao_ThreeZones(double value, string expected)
     {
         var (status, _) = MoistureStatusInterpreter.Interpret(value, "Cacao");
         status.Should().Be(expected);
     }
 
     [Fact]
-    public void Interpret_Aguacate_ExcessAboveCc39()
+    public void Interpret_Cacao_NormalMessage()
     {
-        var (status, alert) = MoistureStatusInterpreter.Interpret(40, "Aguacate");
-        status.Should().Be("excess");
-        alert.Should().Be("EXCESO");
+        var (_, alert) = MoistureStatusInterpreter.Interpret(25.0, "Cacao");
+        alert.Should().Be("Normal, No regar");
     }
 
     [Fact]
-    public void Interpret_Lima_28_IsIrrigate()
+    public void Interpret_Cacao_DrainMessage()
     {
-        // 28 % Lima: 64 % CC=23.04, 80 % CC=28.8 → Regar
-        var (status, alert) = MoistureStatusInterpreter.Interpret(28, "Lima ácida Tahiti");
-        status.Should().Be("irrigate");
-        alert.Should().Be("REGAR");
+        var (_, alert) = MoistureStatusInterpreter.Interpret(30.0, "Cacao");
+        alert.Should().Be("Alerta Drenar - saturación");
+    }
+
+    [Fact]
+    public void Interpret_Cacao_DeficitMessage()
+    {
+        var (_, alert) = MoistureStatusInterpreter.Interpret(15.0, "Cacao");
+        alert.Should().Be("Alerta REGAR por déficit");
+    }
+
+    [Fact]
+    public void Interpret_Lima_30_IsDrain()
+    {
+        var (status, _) = MoistureStatusInterpreter.Interpret(30, "Lima ácida Tahiti");
+        status.Should().Be("drain");
+    }
+
+    [Fact]
+    public void Interpret_Lima_25_IsNormal()
+    {
+        var (status, _) = MoistureStatusInterpreter.Interpret(25, "Lima ácida Tahiti");
+        status.Should().Be("normal");
     }
 
     [Fact]

@@ -38,14 +38,17 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthDto>
 {
     private readonly IIdentityService _identity;
     private readonly IJwtTokenService _jwt;
+    private readonly IGeoRepository _geo;
 
     /// <summary>Inicializa el handler.</summary>
     public LoginCommandHandler(
         IIdentityService identity,
-        IJwtTokenService jwt)
+        IJwtTokenService jwt,
+        IGeoRepository geo)
     {
         _identity = identity;
         _jwt = jwt;
+        _geo = geo;
     }
 
     /// <summary>Ejecuta el login.</summary>
@@ -59,6 +62,8 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthDto>
         if (!result.Success)
             throw new UnauthorizedAppException("Credenciales inválidas o cuenta bloqueada.");
 
+        var location = await _geo.GetUserLocationByUserIdAsync(result.UserId, cancellationToken);
+
         return new AuthDto
         {
             AccessToken = _jwt.CreateAccessToken(result.UserId, result.DisplayName, result.Roles),
@@ -69,6 +74,12 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthDto>
                 Name = result.DisplayName,
                 Email = result.Email,
                 Roles = result.Roles,
+                Country = location?.CountryName,
+                Department = location?.DepartmentName,
+                City = location?.CityName,
+                CountryId = location?.CountryId,
+                DepartmentId = location?.DepartmentId,
+                CityId = location?.CityId,
             },
         };
     }

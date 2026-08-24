@@ -40,6 +40,9 @@ public class HidrixDbContext : IdentityDbContext<ApplicationUser, IdentityRole, 
     /// <summary>Registros de la calculadora de riego.</summary>
     public DbSet<HidrtbCalculoRiego> CalculosRiego => Set<HidrtbCalculoRiego>();
 
+    /// <summary>Notas de evento de riego.</summary>
+    public DbSet<HidrtbNotaEventoRiego> NotasEventoRiego => Set<HidrtbNotaEventoRiego>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

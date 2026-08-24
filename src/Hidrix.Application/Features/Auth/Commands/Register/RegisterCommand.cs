@@ -112,6 +112,9 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
                 Country = location.PaisNombre,
                 Department = location.DepartamentoNombre,
                 City = location.CiudadNombre,
+                CountryId = location.PaisId,
+                DepartmentId = location.DepoId,
+                CityId = location.CiuId,
             },
         };
     }

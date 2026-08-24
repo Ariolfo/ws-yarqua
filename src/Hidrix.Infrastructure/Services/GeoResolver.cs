@@ -89,6 +89,8 @@ public class GeoResolver : IGeoResolver
         return new ResolvedLocation
         {
             CiuId = matchedCity.CiuId,
+            PaisId = pais.PaisId,
+            DepoId = matchedDept.DepoId,
             CodigoPais = pais.PaisId.ToString(),
             CodigoDepartamento = matchedDept.DepoCode,
             CodigoCiudad = matchedCity.CiuCod,
