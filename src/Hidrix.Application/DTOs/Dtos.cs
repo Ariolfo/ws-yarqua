@@ -67,6 +67,9 @@ public class AuthDto
 
     /// <summary>Datos del usuario.</summary>
     public UserDto User { get; set; } = new();
+
+    /// <summary>Indica que debe confirmar el correo antes de iniciar sesión.</summary>
+    public bool EmailConfirmationRequired { get; set; }
 }
 
 /// <summary>Respuesta de refresh de tokens.</summary>
@@ -230,6 +233,6 @@ public class HealthDto
     /// <summary>Estado general (ok|degraded).</summary>
     public string Status { get; set; } = "ok";
 
-    /// <summary>Estado de la base (connected|unavailable).</summary>
-    public string Database { get; set; } = "connected";
+    /// <summary>Estado de la base (connected|unavailable). Null si no se expone públicamente.</summary>
+    public string? Database { get; set; }
 }

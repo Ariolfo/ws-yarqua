@@ -16,6 +16,12 @@ public class JwtOptions
 
     /// <summary>Días de vigencia del refresh token.</summary>
     public int RefreshDays { get; set; } = 30;
+
+    /// <summary>Emisor JWT (iss).</summary>
+    public string Issuer { get; set; } = "hidrix-api";
+
+    /// <summary>Audiencia JWT (aud).</summary>
+    public string Audience { get; set; } = "hidrix-app";
 }
 
 /// <summary>

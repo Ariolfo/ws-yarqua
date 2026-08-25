@@ -55,16 +55,19 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
     private readonly IIdentityService _identity;
     private readonly IGeoResolver _geoResolver;
     private readonly IJwtTokenService _jwt;
+    private readonly IAuthSettings _authSettings;
 
     /// <summary>Inicializa el handler.</summary>
     public RegisterCommandHandler(
         IIdentityService identity,
         IGeoResolver geoResolver,
-        IJwtTokenService jwt)
+        IJwtTokenService jwt,
+        IAuthSettings authSettings)
     {
         _identity = identity;
         _geoResolver = geoResolver;
         _jwt = jwt;
+        _authSettings = authSettings;
     }
 
     /// <summary>Ejecuta el registro.</summary>
@@ -85,37 +88,48 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthDto>
             throw new AppException(ex.Message);
         }
 
+        var emailConfirmed = !_authSettings.RequiresPendingEmailConfirmation();
         var result = await _identity.RegisterAsync(
             request.Email.Trim().ToLowerInvariant(),
             request.Password,
             request.Name.Trim(),
             location.CiuId,
+            emailConfirmed,
             cancellationToken);
 
         if (!result.Success)
             throw new AppException(string.Join("; ", result.Errors));
 
         var nombre = request.Name.Trim();
-
         var roles = await _identity.GetUserRolesAsync(result.UserId, cancellationToken);
+        var userDto = new UserDto
+        {
+            Id = result.UserId,
+            Name = nombre,
+            Email = request.Email.Trim().ToLowerInvariant(),
+            Roles = roles,
+            Country = location.PaisNombre,
+            Department = location.DepartamentoNombre,
+            City = location.CiudadNombre,
+            CountryId = location.PaisId,
+            DepartmentId = location.DepoId,
+            CityId = location.CiuId,
+        };
+
+        if (result.EmailConfirmationRequired)
+        {
+            return new AuthDto
+            {
+                EmailConfirmationRequired = true,
+                User = userDto,
+            };
+        }
 
         return new AuthDto
         {
             AccessToken = _jwt.CreateAccessToken(result.UserId, nombre, roles),
             RefreshToken = _jwt.CreateRefreshToken(result.UserId, nombre),
-            User = new UserDto
-            {
-                Id = result.UserId,
-                Name = nombre,
-                Email = request.Email.Trim().ToLowerInvariant(),
-                Roles = roles,
-                Country = location.PaisNombre,
-                Department = location.DepartamentoNombre,
-                City = location.CiudadNombre,
-                CountryId = location.PaisId,
-                DepartmentId = location.DepoId,
-                CityId = location.CiuId,
-            },
+            User = userDto,
         };
     }
 }

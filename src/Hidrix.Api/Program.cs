@@ -1,9 +1,12 @@
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using DotNetEnv;
 using Mediator;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Serilog;
 using Hidrix.Api.Middleware;
+using Hidrix.Api.Auth;
 using Hidrix.Application;
 using Hidrix.Infrastructure;
 using Hidrix.Infrastructure.Identity;
@@ -32,7 +35,8 @@ try
         options.ServiceLifetime = ServiceLifetime.Transient;
     });
     builder.Services.AddApplication();
-    builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+    builder.Services.AddSingleton<AuthCookieHelper>();
 
     builder.Services.AddControllers()
         .AddJsonOptions(options =>
@@ -77,7 +81,22 @@ try
         options.AddDefaultPolicy(policy =>
             policy.WithOrigins(allowedOrigins)
                 .AllowAnyHeader()
-                .AllowAnyMethod());
+                .AllowAnyMethod()
+                .AllowCredentials());
+    });
+
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        options.AddPolicy("auth", httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 10,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0,
+                }));
     });
 
     var app = builder.Build();
@@ -113,6 +132,7 @@ try
     }
 
     app.UseCors();
+    app.UseRateLimiter();
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();

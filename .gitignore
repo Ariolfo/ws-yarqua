@@ -1,6 +1,7 @@
 ## Secretos y entorno local
 .env
 .env.local
+secrets.json
 *.user
 
 ## Build

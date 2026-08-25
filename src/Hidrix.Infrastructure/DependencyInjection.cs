@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Hidrix.Application.Common.Interfaces;
+using Hidrix.Infrastructure.Auth;
 using Hidrix.Infrastructure.Identity;
 using Hidrix.Infrastructure.Options;
 using Hidrix.Infrastructure.Persistence;
@@ -24,10 +26,15 @@ public static class DependencyInjection
     /// <summary>
     /// Agrega EF Core, Identity, JWT, HttpClient Visualiti y servicios de infraestructura.
     /// </summary>
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<VisualitiOptions>(configuration.GetSection(VisualitiOptions.SectionName));
+        services.Configure<AuthOptions>(configuration.GetSection(AuthOptions.SectionName));
+        services.Configure<HealthOptions>(configuration.GetSection(HealthOptions.SectionName));
 
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection no configurada");
@@ -40,9 +47,9 @@ public static class DependencyInjection
             {
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
@@ -50,27 +57,45 @@ public static class DependencyInjection
             })
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<HidrixDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddPasswordValidator<CommonPasswordValidator>();
 
         // JWT como esquema de autenticación principal
         var jwt = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-            string.IsNullOrWhiteSpace(jwt.Secret)
-                ? "Hidrix_Dev_Secret_Key_Change_Me_32chars!"
-                : jwt.Secret));
+        if (string.IsNullOrWhiteSpace(jwt.Secret) || jwt.Secret.Length < 32)
+        {
+            throw new InvalidOperationException(
+                "Jwt:Secret debe configurarse con al menos 32 caracteres (User Secrets, .env o variables de entorno).");
+        }
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Secret));
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidIssuer = jwt.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwt.Audience,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = key,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromSeconds(30),
                     RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (string.IsNullOrEmpty(context.Token))
+                        {
+                            context.Token = context.Request.Cookies[AuthCookieNames.Access];
+                        }
+
+                        return Task.CompletedTask;
+                    },
                 };
             });
 
@@ -87,6 +112,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IGeoResolver, GeoResolver>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddSingleton<IAuthSettings, AuthSettings>();
         services.AddSingleton<IVisualitiMoistureCache, VisualitiMoistureCache>();
 
         var visualiti = configuration.GetSection(VisualitiOptions.SectionName).Get<VisualitiOptions>()
@@ -99,11 +125,12 @@ public static class DependencyInjection
             .ConfigurePrimaryHttpMessageHandler(() =>
             {
                 var handler = new HttpClientHandler();
-                if (!visualiti.SslVerify)
+                if (environment.IsDevelopment() && !visualiti.SslVerify)
                 {
                     handler.ServerCertificateCustomValidationCallback =
                         static (HttpRequestMessage _, X509Certificate2? _, X509Chain? _, SslPolicyErrors _) => true;
                 }
+
                 return handler;
             });
 

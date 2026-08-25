@@ -30,6 +30,8 @@ public class RegisterCommandValidatorTests
     {
         var result = _validator.Validate(new RegisterCommand
         {
+            Email = "ana@example.com",
+            Password = "Segura1!",
             Name = "Ana",
             Country = "Colombia",
             Department = "Valle del Cauca",

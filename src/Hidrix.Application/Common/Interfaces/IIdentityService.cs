@@ -1,7 +1,7 @@
 namespace Hidrix.Application.Common.Interfaces;
 
 /// <summary>Resultado de registro de usuario.</summary>
-public record RegisterResult(bool Success, string UserId, string[] Errors);
+public record RegisterResult(bool Success, string UserId, string[] Errors, bool EmailConfirmationRequired = false);
 
 /// <summary>Resultado de login.</summary>
 public record LoginResult(bool Success, string UserId, string DisplayName, string Email, string[] Roles, string[] Errors);
@@ -17,10 +17,17 @@ public interface IIdentityService
         string password,
         string displayName,
         int? ciuId,
+        bool emailConfirmed = true,
         CancellationToken ct = default);
 
     /// <summary>Autentica usuario por email y contraseña.</summary>
     Task<LoginResult> LoginAsync(string email, string password, CancellationToken ct = default);
+
+    /// <summary>Confirma el correo con el token de Identity.</summary>
+    Task<(bool Success, string[] Errors)> ConfirmEmailAsync(
+        string email,
+        string token,
+        CancellationToken ct = default);
 
     /// <summary>Obtiene los roles activos del usuario.</summary>
     Task<string[]> GetUserRolesAsync(string userId, CancellationToken ct = default);
@@ -33,4 +40,7 @@ public interface IIdentityService
 
     /// <summary>Busca un usuario por id y devuelve displayName y email.</summary>
     Task<(string? DisplayName, string? Email)> GetUserInfoAsync(string userId, CancellationToken ct = default);
+
+    /// <summary>Indica si el usuario puede renovar tokens (activo y no bloqueado).</summary>
+    Task<bool> CanRefreshAsync(string userId, CancellationToken ct = default);
 }

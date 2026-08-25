@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Hidrix.Application.Common.Interfaces;
 using Hidrix.Infrastructure.Identity;
+using Hidrix.Infrastructure.Options;
 
 namespace Hidrix.Infrastructure.Services;
 
@@ -10,11 +12,13 @@ namespace Hidrix.Infrastructure.Services;
 public class IdentityService : IIdentityService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly AuthOptions _authOptions;
 
     /// <summary>Inicializa el servicio.</summary>
-    public IdentityService(UserManager<ApplicationUser> userManager)
+    public IdentityService(UserManager<ApplicationUser> userManager, IOptions<AuthOptions> authOptions)
     {
         _userManager = userManager;
+        _authOptions = authOptions.Value;
     }
 
     /// <inheritdoc />
@@ -23,12 +27,14 @@ public class IdentityService : IIdentityService
         string password,
         string displayName,
         int? ciuId,
+        bool emailConfirmed = true,
         CancellationToken ct = default)
     {
         var user = new ApplicationUser
         {
             UserName = email,
             Email = email,
+            EmailConfirmed = emailConfirmed,
             UsuaNombre = displayName,
             CiuId = ciuId,
             UsuaActivo = true,
@@ -39,10 +45,16 @@ public class IdentityService : IIdentityService
 
         var result = await _userManager.CreateAsync(user, password);
         if (!result.Succeeded)
+        {
             return new RegisterResult(false, string.Empty, result.Errors.Select(e => e.Description).ToArray());
+        }
 
         await _userManager.AddToRoleAsync(user, AppRoles.User);
-        return new RegisterResult(true, user.Id, []);
+        return new RegisterResult(
+            true,
+            user.Id,
+            [],
+            EmailConfirmationRequired: _authOptions.RequireEmailConfirmation && !emailConfirmed);
     }
 
     /// <inheritdoc />
@@ -50,10 +62,25 @@ public class IdentityService : IIdentityService
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null || !user.UsuaActivo)
+        {
             return new LoginResult(false, string.Empty, string.Empty, string.Empty, [], ["Credenciales inválidas."]);
+        }
+
+        if (_authOptions.RequireEmailConfirmation && !user.EmailConfirmed)
+        {
+            return new LoginResult(
+                false,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                [],
+                ["Confirme su correo electrónico antes de iniciar sesión."]);
+        }
 
         if (await _userManager.IsLockedOutAsync(user))
+        {
             return new LoginResult(false, string.Empty, string.Empty, string.Empty, [], ["Cuenta bloqueada temporalmente."]);
+        }
 
         if (!await _userManager.CheckPasswordAsync(user, password))
         {
@@ -64,6 +91,27 @@ public class IdentityService : IIdentityService
         await _userManager.ResetAccessFailedCountAsync(user);
         var roles = (await _userManager.GetRolesAsync(user)).ToArray();
         return new LoginResult(true, user.Id, user.UsuaNombre, user.Email ?? string.Empty, roles, []);
+    }
+
+    /// <inheritdoc />
+    public async Task<(bool Success, string[] Errors)> ConfirmEmailAsync(
+        string email,
+        string token,
+        CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByEmailAsync(email.Trim().ToLowerInvariant());
+        if (user is null)
+        {
+            return (false, ["Usuario no encontrado."]);
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            return (false, result.Errors.Select(e => e.Description).ToArray());
+        }
+
+        return (true, []);
     }
 
     /// <inheritdoc />
@@ -81,7 +129,9 @@ public class IdentityService : IIdentityService
         if (user is null) return ["Usuario no encontrado."];
 
         if (!await _userManager.IsInRoleAsync(user, role))
+        {
             await _userManager.AddToRoleAsync(user, role);
+        }
 
         return [];
     }
@@ -100,5 +150,22 @@ public class IdentityService : IIdentityService
     {
         var user = await _userManager.FindByIdAsync(userId);
         return (user?.UsuaNombre, user?.Email);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> CanRefreshAsync(string userId, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null || !user.UsuaActivo)
+        {
+            return false;
+        }
+
+        if (_authOptions.RequireEmailConfirmation && !user.EmailConfirmed)
+        {
+            return false;
+        }
+
+        return !await _userManager.IsLockedOutAsync(user);
     }
 }

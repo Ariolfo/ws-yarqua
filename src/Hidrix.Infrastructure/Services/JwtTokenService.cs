@@ -35,15 +35,7 @@ public class JwtTokenService : IJwtTokenService
     public (string Sub, string? Name) ValidateToken(string token, string expectedType)
     {
         var handler = new JwtSecurityTokenHandler();
-        var principal = handler.ValidateToken(token, new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = _key,
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromSeconds(30),
-        }, out var validated);
+        var principal = handler.ValidateToken(token, BuildValidationParameters(), out var validated);
 
         var jwt = (JwtSecurityToken)validated;
         var type = jwt.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
@@ -75,6 +67,8 @@ public class JwtTokenService : IJwtTokenService
 
         var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
+            issuer: _options.Issuer,
+            audience: _options.Audience,
             claims: claims,
             notBefore: now,
             expires: now.Add(lifetime),
@@ -82,6 +76,19 @@ public class JwtTokenService : IJwtTokenService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    private TokenValidationParameters BuildValidationParameters() =>
+        new()
+        {
+            ValidateIssuer = true,
+            ValidIssuer = _options.Issuer,
+            ValidateAudience = true,
+            ValidAudience = _options.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = _key,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30),
+        };
 
     private static long Epoch(DateTime utc) => new DateTimeOffset(utc).ToUnixTimeSeconds();
 }

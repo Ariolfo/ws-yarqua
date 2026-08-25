@@ -48,6 +48,11 @@ public class RefreshCommandHandler : IRequestHandler<RefreshCommand, RefreshDto>
         try
         {
             var (sub, name) = _jwt.ValidateToken(request.RefreshToken, "refresh");
+            if (!await _identity.CanRefreshAsync(sub, cancellationToken))
+            {
+                throw new UnauthorizedAppException("Sesión expirada, vuelve a iniciar sesión.");
+            }
+
             var roles = await _identity.GetUserRolesAsync(sub, cancellationToken);
             return new RefreshDto
             {
